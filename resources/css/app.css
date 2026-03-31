@@ -4,8 +4,35 @@
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
+@source '../**/*.jsx';
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Cavite Institute Palette */
+    --color-primary: #7A1C1C;    /* Maroon */
+    --color-secondary: #A32626;  /* Deep Red */
+    --color-accent: #D4AF37;     /* Gold */
+    --color-bg: #F5F5F5;         /* Light Gray */
+    --color-text: #333333;       /* Dark Gray */
+}
+
+@layer utilities {
+  /* Backgrounds */
+  .bg-primary { background-color: var(--color-primary); }
+  .bg-secondary { background-color: var(--color-secondary); }
+  .bg-accent { background-color: var(--color-accent); }
+  .bg-app { background-color: var(--color-bg); }
+
+  /* Text */
+  .text-primary { color: var(--color-primary); }
+  .text-secondary { color: var(--color-secondary); }
+  .text-accent { color: var(--color-accent); }
+  .text-app { color: var(--color-text); }
+
+  /* Borders */
+  .border-primary { border-color: var(--color-primary); }
+  .border-secondary { border-color: var(--color-secondary); }
+  .border-accent { border-color: var(--color-accent); }
 }
