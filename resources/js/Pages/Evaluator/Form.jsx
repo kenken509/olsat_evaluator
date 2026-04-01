@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { calculateAge } from "@/utils/dateUtils";
+import axios from "axios";
 
 const initialForm = {
   name: "",
@@ -16,9 +17,29 @@ const initialForm = {
   nonverbal: "",
 };
 
+
+
 export default function Form() {
   const [form, setForm] = useState(initialForm);
   const [age, setAge] = useState({ years: "", months: "" });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const payload = {
+        ...form,
+        age,
+      };
+
+      const { data } = await axios.post("/evaluator/evaluate", payload);
+
+      console.log("Evaluation result:", data);
+
+    } catch (error) {
+      console.error("Submit error:", error.response?.data || error.message);
+    }
+  };
 
   const inputClass =
     "w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-app outline-none transition focus:border-accent focus:ring-2 focus:ring-yellow-200";
@@ -46,14 +67,7 @@ export default function Form() {
     setAge({ years: "", months: "" });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
 
-    console.log({
-      ...form,
-      age,
-    });
-  };
 
   return (
     <div className="min-h-screen bg-app px-4 py-4 sm:px-6 lg:px-8">
