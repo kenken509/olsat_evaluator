@@ -9,7 +9,7 @@ class Age12TotalSeeder extends BaseScaledScoreSeeder
     /**
      * Run the database seeds.
      */
-     protected function age(): int
+    protected function age(): int
     {
         return 12;
     }

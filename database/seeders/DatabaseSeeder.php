@@ -18,6 +18,8 @@ use Database\Seeders\Age12NonVerbalSeeder;
 use Database\Seeders\Age12TotalSeeder;
 use Database\Seeders\Age12VerbalSeeder;
 use Database\Seeders\Age13TotalSeeder;
+use Database\Seeders\Age13VerbalSeeder;
+use Database\Seeders\Age14NonVerbalSeeder;
 use Database\Seeders\RawScaledLevelASeeder;
 use Database\Seeders\RawScaledLevelBseeder;
 use Database\Seeders\RawScaledLevelCSeeder;
@@ -69,6 +71,7 @@ class DatabaseSeeder extends Seeder
             Age12NonVerbalSeeder::class,
             Age13TotalSeeder::class,
             Age13VerbalSeeder::class,
+            Age14NonVerbalSeeder::class,
         ]);
     }
 }
