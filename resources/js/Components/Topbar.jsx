@@ -6,7 +6,7 @@ export default function Topbar({ title, subtitle, onMenuClick }) {
                     <button
                         type="button"
                         onClick={onMenuClick}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-primary shadow-sm transition hover:bg-app"
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-primary shadow-sm transition hover:bg-app cursor-pointer"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"

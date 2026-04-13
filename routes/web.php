@@ -25,11 +25,11 @@ Route::controller(ConversionTableController::class)->group(function () {
 });
 
 Route::controller(AuthController::class)->group(function () {
-    Route::get('/login', 'index');
+    Route::get('/login', 'index')->name('login');
     Route::post('/login', 'store');
-    Route::get('/logout', 'logout');
+    Route::get('/logout', 'destroy');
 });
 
-Route::controller(AdminDashboardController::class)->group(function () {
+Route::middleware(['auth', 'admin'])->controller(AdminDashboardController::class)->group(function () {
     Route::get('/admin/dashboard', 'index');
 });

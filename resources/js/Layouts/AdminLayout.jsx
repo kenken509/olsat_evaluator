@@ -13,11 +13,11 @@ export default function AdminLayout({ children }) {
 
     return (
         <div className="h-screen overflow-hidden bg-app text-app">
-            <div className="relative flex h-full overflow-hidden">
+            <div className="relative h-full">
                 <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
 
                 <main
-                    className={`flex min-w-0 flex-1 flex-col overflow-hidden transition-all duration-300 ${
+                    className={`flex h-full min-w-0 flex-col overflow-hidden transition-all duration-300 ${
                         sidebarOpen ? "lg:ml-72" : "lg:ml-0"
                     }`}
                 >

@@ -57,4 +57,11 @@ class AuthController extends Controller
             default => redirect('/'),
         };
     }
+
+    public function destroy()
+    {
+        Auth::logout();
+
+        return redirect('/');
+    }
 }
