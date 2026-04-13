@@ -38,7 +38,7 @@ export default function Index() {
 
         {/* Button */}
         <button className="group relative bg-primary text-white px-8 py-3 rounded-lg cursor-pointer font-semibold shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 overflow-hidden">
-          <Link href="/evaluator" className="relative z-10">Get Started</Link>
+          <Link href="/login" className="relative z-10">Get Started</Link>
           <div className="absolute inset-0 bg-secondary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
         </button>
 
