@@ -9,6 +9,7 @@ export default function AdminLayout({ children }) {
     const title = header?.title ?? "Dashboard";
     const subtitle = header?.subtitle ?? "Overview of your system activity";
 
+    
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     return (
@@ -26,7 +27,7 @@ export default function AdminLayout({ children }) {
                         subtitle={subtitle}
                         onMenuClick={() => setSidebarOpen((prev) => !prev)}
                     />
-
+    
                     <section className="min-h-0 flex-1 overflow-hidden">
                         <div className="h-full overflow-y-auto px-4 py-6 md:px-6">
                             {children}

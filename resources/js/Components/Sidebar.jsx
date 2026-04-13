@@ -10,9 +10,9 @@ export default function Sidebar({ open, setOpen }) {
     const { url } = usePage();
 
     const navItems = [
-        { label: "Dashboard", href: "/admin/dashboard", icon: <AiOutlineDashboard /> },
-        { label: "Users", href: "/admin/users", icon: <FiUsers /> },
-        { label: "Students", href: "/admin/students", icon: <PiStudentLight /> },
+        { label: "Dashboard", href: "/admin-panel/dashboard", icon: <AiOutlineDashboard /> },
+        { label: "Users", href: "/admin-panel/users", icon: <FiUsers /> },
+        { label: "Students", href: "/admin-panel/students", icon: <PiStudentLight /> },
         { label: "Spring Norms", href: "/admin/spring-norms", icon: <CiViewTable /> },
         { label: "Evaluator", href: "/evaluator", icon: <LuArrowLeftRight /> },
         { label: "Audit Logs", href: "/admin/audit-logs", icon: <IoShieldCheckmarkOutline /> },

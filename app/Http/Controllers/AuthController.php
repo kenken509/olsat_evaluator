@@ -52,7 +52,7 @@ class AuthController extends Controller
         ]);
 
         return match ($user->role) {
-            'admin' => redirect('/admin/dashboard'),
+            'admin' => redirect('/admin-panel/dashboard'),
             'faculty' => redirect()->route('faculty.dashboard'),
             default => redirect('/'),
         };

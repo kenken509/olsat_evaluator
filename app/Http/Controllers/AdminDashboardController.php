@@ -8,6 +8,12 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-        return inertia('Admin/Dashboard/Index');
+
+        return inertia('Admin/Dashboard/Index', [
+            'header' => [
+                'title' => 'Dashboard',
+                'subtitle' => 'Overview of your system activity'
+            ]
+        ]);
     }
 }

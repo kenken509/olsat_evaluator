@@ -4,7 +4,10 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConversionTableController;
 use App\Http\Controllers\EvaluatorController;
+use App\Http\Controllers\StudentsController;
+use App\Http\Controllers\UsersController;
 use App\Models\RawScaledLevel;
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Route;
 use Termwind\Components\Raw;
 
@@ -31,5 +34,13 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 Route::middleware(['auth', 'admin'])->controller(AdminDashboardController::class)->group(function () {
-    Route::get('/admin/dashboard', 'index');
+    Route::get('/admin-panel/dashboard', 'index');
+});
+
+Route::middleware(['auth', 'admin'])->controller(UsersController::class)->group(function () {
+    Route::get('/admin-panel/users', 'index');
+});
+
+Route::middleware(['auth', 'admin'])->controller(StudentsController::class)->group(function () {
+    Route::get('/admin-panel/students', 'index');
 });
