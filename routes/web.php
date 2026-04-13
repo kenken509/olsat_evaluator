@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConversionTableController;
 use App\Http\Controllers\EvaluatorController;
@@ -25,6 +26,10 @@ Route::controller(ConversionTableController::class)->group(function () {
 
 Route::controller(AuthController::class)->group(function () {
     Route::get('/login', 'index');
-    Route::post('/auth', 'authenticate');
+    Route::post('/login', 'store');
     Route::get('/logout', 'logout');
+});
+
+Route::controller(AdminDashboardController::class)->group(function () {
+    Route::get('/admin/dashboard', 'index');
 });

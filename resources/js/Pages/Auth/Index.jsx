@@ -15,7 +15,7 @@ export default function Login() {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    post('/auth', {
+    post('/login', {
       onFinish: () => reset('password'),
       // onSuccess: () => { } // optional
     })

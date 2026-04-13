@@ -41,6 +41,7 @@ use Database\Seeders\RawScaledLevelDSeeder;
 use Database\Seeders\RawScaledLevelESeeder;
 use Database\Seeders\RawScaledLevelFSeeder;
 use Database\Seeders\RawScaledLevelGSeeder;
+use Database\Seeders\UserSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -61,6 +62,7 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
+            UserSeeder::class,
             RawScaledLevelASeeder::class,
             RawScaledLevelBseeder::class,
             RawScaledLevelCSeeder::class,
