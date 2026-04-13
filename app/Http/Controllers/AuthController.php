@@ -10,4 +10,13 @@ class AuthController extends Controller
     {
         return inertia('Auth/Index');
     }
+
+    public function authenticate(Request $request)
+    {
+        dd('yoooooooooooooooo');
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+    }
 }

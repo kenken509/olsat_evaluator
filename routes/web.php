@@ -25,4 +25,6 @@ Route::controller(ConversionTableController::class)->group(function () {
 
 Route::controller(AuthController::class)->group(function () {
     Route::get('/login', 'index');
+    Route::post('/auth', 'authenticate');
+    Route::get('/logout', 'logout');
 });
