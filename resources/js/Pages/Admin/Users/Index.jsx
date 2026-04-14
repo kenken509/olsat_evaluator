@@ -4,8 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { FaRegEdit } from "react-icons/fa";
 import { MdOutlineDelete } from "react-icons/md";
 import Swal from "sweetalert2";
+import UsersCreateModal from "./Components/UsersCreateModal";
 
 export default function Index({authUserId}) {
+    const [createOpen, setCreateOpen] = useState(false);
     const [users, setUsers] = useState([]);
     const [meta, setMeta] = useState(null);
 
@@ -210,6 +212,17 @@ export default function Index({authUserId}) {
             setFetching(false);
         }
     };
+
+    const handleCreated = () => {
+        setCreateOpen(false);
+
+        fetchUsers({
+            page: 1,
+            query: search,
+            per_page: perPage,
+            currentView: view,
+        });
+    };
    
 
     return (
@@ -290,6 +303,7 @@ export default function Index({authUserId}) {
 
                         <button
                             type="button"
+                            onClick={() => setCreateOpen(true)}
                             className="rounded-xl bg-secondary px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 cursor-pointer"
                         >
                             + New
@@ -436,6 +450,11 @@ export default function Index({authUserId}) {
                     </div>
                 )}
             </div>
+            <UsersCreateModal
+                open={createOpen}
+                onClose={() => setCreateOpen(false)}
+                onCreated={handleCreated}
+            />
         </AdminLayout>
     );
 }
