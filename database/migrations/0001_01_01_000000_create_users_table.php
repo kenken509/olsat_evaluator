@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-
+            $table->boolean('must_change_password')->default(true);
             // MVP additions (future-proof)
             $table->enum('role', ['admin', 'faculty', 'evaluator']);
             $table->boolean('is_active')->default(true);   // deactivate instead of delete

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AuditLogsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConversionTableController;
 use App\Http\Controllers\EvaluatorController;
@@ -50,4 +51,9 @@ Route::middleware(['auth', 'admin'])->controller(UsersController::class)->group(
     Route::delete('/admin-panel/users/{user}', 'destroy');
     Route::patch('/admin-panel/users/{id}/restore', 'restore');
     Route::post('/admin-panel/users', 'store');
+});
+
+Route::middleware(['auth', 'admin'])->controller(AuditLogsController::class)->group(function () {
+    Route::get('/admin-panel/audit-logs', 'index');
+    Route::get('/admin-panel/audit-logs-data', 'getData');
 });

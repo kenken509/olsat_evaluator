@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -89,7 +90,6 @@ class UsersController extends Controller
             'lname' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'role' => ['required', 'in:admin,faculty,evaluator'],
-            'password' => ['required', 'confirmed', Password::min(8)],
         ]);
 
         DB::beginTransaction();
@@ -100,15 +100,28 @@ class UsersController extends Controller
                 'lname' => $validated['lname'],
                 'email' => $validated['email'],
                 'role' => $validated['role'],
-                'password' => Hash::make($validated['password']),
+                'password' => Hash::make('password'),
                 'is_active' => true,
             ]);
 
-            // AuditLog::create([
-            //     'user_id' => auth()->id(),
-            //     'action' => 'create_user',
-            //     'description' => "Created user #{$user->id}: {$user->fname} {$user->lname}",
-            // ]);
+            AuditLog::create([
+                'actor_id' => Auth::id(),
+                'module' => 'users',
+                'action' => 'create',
+                'subject_id' => $user->id,
+                'subject_type' => User::class,
+                'description' => "Created user #{$user->id}: {$user->fname} {$user->lname}",
+                'old_values' => null,
+                'new_values' => json_encode([
+                    'fname' => $user->fname,
+                    'lname' => $user->lname,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'is_active' => $user->is_active,
+                ]),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
 
             DB::commit();
 
