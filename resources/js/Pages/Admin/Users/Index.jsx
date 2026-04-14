@@ -3,8 +3,9 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { FaRegEdit } from "react-icons/fa";
 import { MdOutlineDelete } from "react-icons/md";
+import Swal from "sweetalert2";
 
-export default function Index() {
+export default function Index({authUserId}) {
     const [users, setUsers] = useState([]);
     const [meta, setMeta] = useState(null);
 
@@ -133,6 +134,84 @@ export default function Index() {
         });
     };
 
+    const handleDeleteOrRestore = async (user) => {
+        const isArchivedView = view === "archived";
+        const isSelf = Number(user.id) === Number(authUserId);
+
+        if (!isArchivedView && isSelf) {
+            await Swal.fire({
+                icon: "warning",
+                title: "Action not allowed",
+                text: "You cannot archive your own account.",
+                confirmButtonColor: "#7A1C1C",
+            });
+            return;
+        }
+
+        const fullName = `${user.fname} ${user.lname}`;
+
+        const result = await Swal.fire({
+            title: isArchivedView ? "Restore user?" : "Archive user?",
+            text: isArchivedView
+                ? `Do you want to restore ${fullName}?`
+                : `Do you want to archive ${fullName}?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: isArchivedView ? "#15803d" : "#7A1C1C",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: isArchivedView ? "Yes, restore" : "Yes, archive",
+            cancelButtonText: "Cancel",
+            reverseButtons: true,
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            setFetching(true);
+
+            if (isArchivedView) {
+                await axios.patch(`/admin-panel/users/${user.id}/restore`);
+            } else {
+                await axios.delete(`/admin-panel/users/${user.id}`);
+            }
+
+            await Swal.fire({
+                icon: "success",
+                title: isArchivedView ? "User restored" : "User archived",
+                text: isArchivedView
+                    ? `${fullName} has been restored successfully.`
+                    : `${fullName} has been archived successfully.`,
+                confirmButtonColor: "#7A1C1C",
+            });
+
+            const currentPage = meta?.current_page ?? 1;
+
+            fetchUsers({
+                page: currentPage,
+                query: search,
+                per_page: perPage,
+                currentView: view,
+            });
+        } catch (error) {
+            console.error(
+                isArchivedView ? "Failed to restore user:" : "Failed to archive user:",
+                error
+            );
+
+            Swal.fire({
+                icon: "error",
+                title: "Action failed",
+                text: isArchivedView
+                    ? "Failed to restore user."
+                    : "Failed to archive user.",
+                confirmButtonColor: "#7A1C1C",
+            });
+
+            setFetching(false);
+        }
+    };
+   
+
     return (
         <AdminLayout>
             <div className="space-y-4">
@@ -241,68 +320,88 @@ export default function Index() {
                                         </td>
                                     </tr>
                                 ) : users.length > 0 ? (
-                                    users.map((user) => (
-                                        <tr
-                                            key={user.id}
-                                            className="border-b border-primary/10 last:border-b-0 hover:bg-app"
-                                        >
-                                            <td className="px-6 py-4 text-sm text-app">
-                                                {user.id}
-                                            </td>
-                                            <td className="px-6 py-4 text-sm font-semibold text-app">
-                                                {user.fname} {user.lname}
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-app">
-                                                {user.email}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-white">
-                                                    {user.role}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                {view === "archived" ? (
-                                                    <span className="rounded-full border border-primary px-3 py-1 text-xs font-bold text-primary">
-                                                        Archived
-                                                    </span>
-                                                ) : user.is_active ? (
-                                                    <span className="rounded-full bg-accent px-3 py-1 text-xs font-bold text-primary">
-                                                        Active
-                                                    </span>
-                                                ) : (
-                                                    <span className="rounded-full border border-primary px-3 py-1 text-xs font-bold text-primary">
-                                                        Inactive
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-app">
-                                                {user.last_login_at ?? "Never"}
-                                            </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <div className="flex items-center justify-center gap-4">
-                                                    <button
-                                                        type="button"
-                                                        className="cursor-pointer"
-                                                        title="Edit"
-                                                    >
-                                                        <FaRegEdit className="text-lg text-green-800" />
-                                                    </button>
+                                    users.map((user) =>{ 
+                                        const isSelf = Number(user.id) === Number(authUserId);
+                                        return    (
+                                            
+                                                <tr
+                                                    key={user.id}
+                                                    className="border-b border-primary/10 last:border-b-0 hover:bg-app"
+                                                >
+                                                    <td className="px-6 py-4 text-sm text-app">
+                                                        {user.id}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm font-semibold text-app">
+                                                        {user.fname} {user.lname}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-app">
+                                                        {user.email}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-white">
+                                                            {user.role}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        {view === "archived" ? (
+                                                            <span className="rounded-full border border-primary px-3 py-1 text-xs font-bold text-primary">
+                                                                Archived
+                                                            </span>
+                                                        ) : user.is_active ? (
+                                                            <span className="rounded-full bg-accent px-3 py-1 text-xs font-bold text-primary">
+                                                                Active
+                                                            </span>
+                                                        ) : (
+                                                            <span className="rounded-full border border-primary px-3 py-1 text-xs font-bold text-primary">
+                                                                Inactive
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-app">
+                                                        {user.last_login_at ?? "Never"}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-center">
+                                                        <div className="flex items-center justify-center gap-4">
+                                                            <button
+                                                                type="button"
+                                                                className="cursor-pointer"
+                                                                title="Edit"
+                                                            >
+                                                                <FaRegEdit className="text-lg text-green-800" />
+                                                            </button>
 
-                                                    <button
-                                                        type="button"
-                                                        className="cursor-pointer"
-                                                        title={
-                                                            view === "archived"
-                                                                ? "Restore"
-                                                                : "Archive"
-                                                        }
-                                                    >
-                                                        <MdOutlineDelete className="text-xl text-primary" />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleDeleteOrRestore(user)}
+                                                                disabled={view !== "archived" && isSelf}
+                                                                title={
+                                                                    view === "archived"
+                                                                        ? "Restore"
+                                                                        : isSelf
+                                                                        ? "You cannot archive your own account"
+                                                                        : "Archive"
+                                                                }
+                                                                className={[
+                                                                    "cursor-pointer",
+                                                                    view !== "archived" && isSelf ? "opacity-50 cursor-not-allowed" : "",
+                                                                ].join(" ")}
+                                                            >
+                                                                <MdOutlineDelete
+                                                                    className={[
+                                                                        "text-xl",
+                                                                        view === "archived"
+                                                                            ? "text-green-700"
+                                                                            : isSelf
+                                                                            ? "text-gray-400"
+                                                                            : "text-primary",
+                                                                    ].join(" ")}
+                                                                />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )
+                                    })
                                 ) : (
                                     <tr>
                                         <td colSpan="7" className="px-6 py-10 text-center text-app">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UsersController extends Controller
 {
@@ -17,6 +18,7 @@ class UsersController extends Controller
 
         return inertia('Admin/Users/Index', [
             'header' => $header,
+            'authUserId' => Auth::id(),
         ]);
     }
 
@@ -49,5 +51,30 @@ class UsersController extends Controller
             ->withQueryString();
 
         return response()->json($users);
+    }
+
+    public function destroy(User $user)
+    {
+        if (Auth::id() === $user->id) {
+            return response()->json([
+                'message' => 'You cannot archive your own account.'
+            ], 422);
+        }
+
+        $user->delete();
+
+        return response()->json([
+            'message' => 'User archived successfully.',
+        ]);
+    }
+
+    public function restore($id)
+    {
+        $user = User::onlyTrashed()->findOrFail($id);
+        $user->restore();
+
+        return response()->json([
+            'message' => 'User restored successfully.',
+        ]);
     }
 }

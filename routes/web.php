@@ -47,4 +47,6 @@ Route::middleware(['auth', 'admin'])->controller(StudentsController::class)->gro
 
 Route::middleware(['auth', 'admin'])->controller(UsersController::class)->group(function () {
     Route::get('/admin-panel/users-all', 'allUsers');
+    Route::delete('/admin-panel/users/{user}', 'destroy');
+    Route::patch('/admin-panel/users/{id}/restore', 'restore');
 });
