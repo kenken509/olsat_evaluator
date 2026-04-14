@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class UsersController extends Controller
@@ -140,6 +141,85 @@ class UsersController extends Controller
 
             return response()->json([
                 'message' => 'Failed to create user. Please try again.',
+            ], 500);
+        }
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'fname' => ['required', 'string', 'max:255'],
+            'lname' => ['required', 'string', 'max:255'],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+            'role' => ['required', 'in:admin,faculty,evaluator'],
+        ]);
+
+        DB::beginTransaction();
+
+        // admin change own role protection
+        if (Auth::id() === $user->id && $request->role !== $user->role) {
+            return response()->json([
+                'message' => 'You cannot change your own role.',
+            ], 422);
+        }
+
+        try {
+            $oldValues = [
+                'fname' => $user->fname,
+                'lname' => $user->lname,
+                'email' => $user->email,
+                'role' => $user->role,
+                'is_active' => $user->is_active,
+            ];
+
+            $user->update([
+                'fname' => $validated['fname'],
+                'lname' => $validated['lname'],
+                'email' => $validated['email'],
+                'role' => $validated['role'],
+            ]);
+
+            AuditLog::create([
+                'actor_id' => Auth::id(),
+                'module' => 'users',
+                'action' => 'update',
+                'subject_id' => $user->id,
+                'subject_type' => User::class,
+                'description' => "Updated user #{$user->id}: {$user->fname} {$user->lname}",
+                'old_values' => json_encode($oldValues),
+                'new_values' => json_encode([
+                    'fname' => $user->fname,
+                    'lname' => $user->lname,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'is_active' => $user->is_active,
+                ]),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'User updated successfully.',
+                'user' => $user,
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            Log::error('Failed to update user.', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id,
+                'auth_user_id' => Auth::id(),
+            ]);
+
+            return response()->json([
+                'message' => 'Failed to update user. Please try again.',
             ], 500);
         }
     }

@@ -5,8 +5,10 @@ import { FaRegEdit } from "react-icons/fa";
 import { MdOutlineDelete } from "react-icons/md";
 import Swal from "sweetalert2";
 import UsersCreateModal from "./Components/UsersCreateModal";
+import UsersEditModal from "./Components/UsersEditModal";
 
 export default function Index({authUserId}) {
+    const [editOpen, setEditOpen] = useState(false);
     const [createOpen, setCreateOpen] = useState(false);
     const [users, setUsers] = useState([]);
     const [meta, setMeta] = useState(null);
@@ -17,7 +19,8 @@ export default function Index({authUserId}) {
     const [search, setSearch] = useState("");
     const [perPage, setPerPage] = useState(10);
     const [view, setView] = useState("active"); // active | archived
-
+   
+    const [selectedUser, setSelectedUser] = useState(null);
     const debounceRef = useRef(null);
     const abortRef = useRef(null);
 
@@ -223,6 +226,23 @@ export default function Index({authUserId}) {
             currentView: view,
         });
     };
+
+    const handleEdit = (user) => {
+        setSelectedUser(user);
+        setEditOpen(true);
+    };
+
+    const handleUpdated = () => {
+        setEditOpen(false);
+        setSelectedUser(null);
+
+        fetchUsers({
+            page: meta?.current_page ?? 1,
+            query: search,
+            per_page: perPage,
+            currentView: view,
+        });
+    };
    
 
     return (
@@ -378,6 +398,7 @@ export default function Index({authUserId}) {
                                                         <div className="flex items-center justify-center gap-4">
                                                             <button
                                                                 type="button"
+                                                                onClick={() => handleEdit(user)}
                                                                 className="cursor-pointer"
                                                                 title="Edit"
                                                             >
@@ -454,6 +475,16 @@ export default function Index({authUserId}) {
                 open={createOpen}
                 onClose={() => setCreateOpen(false)}
                 onCreated={handleCreated}
+            />
+
+            <UsersEditModal
+                open={editOpen}
+                user={selectedUser}
+                onClose={() => {
+                    setEditOpen(false);
+                    setSelectedUser(null);
+                }}
+                onUpdated={handleUpdated}
             />
         </AdminLayout>
     );

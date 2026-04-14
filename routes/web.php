@@ -51,6 +51,7 @@ Route::middleware(['auth', 'admin'])->controller(UsersController::class)->group(
     Route::delete('/admin-panel/users/{user}', 'destroy');
     Route::patch('/admin-panel/users/{id}/restore', 'restore');
     Route::post('/admin-panel/users', 'store');
+    Route::put('/admin-panel/users/{user}', 'update');
 });
 
 Route::middleware(['auth', 'admin'])->controller(AuditLogsController::class)->group(function () {
