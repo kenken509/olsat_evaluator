@@ -44,3 +44,7 @@ Route::middleware(['auth', 'admin'])->controller(UsersController::class)->group(
 Route::middleware(['auth', 'admin'])->controller(StudentsController::class)->group(function () {
     Route::get('/admin-panel/students', 'index');
 });
+
+Route::middleware(['auth', 'admin'])->controller(UsersController::class)->group(function () {
+    Route::get('/admin-panel/users-all', 'allUsers');
+});
