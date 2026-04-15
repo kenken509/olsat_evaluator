@@ -7,12 +7,14 @@ import {
     ChevronUp,
 } from "lucide-react";
 import AdminLayout from "../../../Layouts/AdminLayout";
+import LevelConversionTable from "./Components/LevelConversionTable";
+import StandardTable from "./Components/StandardTable";
 
 const CATEGORY_CONFIG = {
     levels: {
         label: "Levels",
         color: "bg-violet-100 text-violet-700 border-violet-200",
-        options: ["Level D", "Level E", "Level F", "Level G"],
+        options: ["Level E", "Level F", "Level G"],
     },
     ages: {
         label: "Age",
@@ -33,84 +35,44 @@ const CATEGORY_CONFIG = {
 
 const LEVEL_ROWS = [
     {
-        total_left_raw: 64,
-        total_left_scaled: 752,
-        total_right_raw: 32,
-        total_right_scaled: 571,
+        total_raw_1: 64,
+        total_scaled_1: 752,
+        total_raw_2: 32,
+        total_scaled_2: 571,
         verbal_raw: 32,
         verbal_scaled: 720,
         nonverbal_raw: 32,
         nonverbal_scaled: 734,
     },
     {
-        total_left_raw: 63,
-        total_left_scaled: 729,
-        total_right_raw: 31,
-        total_right_scaled: 569,
+        total_raw_1: 63,
+        total_scaled_1: 729,
+        total_raw_2: 31,
+        total_scaled_2: 569,
         verbal_raw: 31,
         verbal_scaled: 697,
         nonverbal_raw: 31,
         nonverbal_scaled: 710,
     },
     {
-        total_left_raw: 62,
-        total_left_scaled: 704,
-        total_right_raw: 30,
-        total_right_scaled: 566,
+        total_raw_1: 62,
+        total_scaled_1: 704,
+        total_raw_2: 30,
+        total_scaled_2: 566,
         verbal_raw: 30,
         verbal_scaled: 670,
         nonverbal_raw: 30,
         nonverbal_scaled: 684,
     },
     {
-        total_left_raw: 61,
-        total_left_scaled: 689,
-        total_right_raw: 29,
-        total_right_scaled: 564,
+        total_raw_1: 61,
+        total_scaled_1: 689,
+        total_raw_2: 29,
+        total_scaled_2: 564,
         verbal_raw: 29,
         verbal_scaled: 654,
         nonverbal_raw: 29,
         nonverbal_scaled: 668,
-    },
-    {
-        total_left_raw: 60,
-        total_left_scaled: 677,
-        total_right_raw: 28,
-        total_right_scaled: 561,
-        verbal_raw: 28,
-        verbal_scaled: 642,
-        nonverbal_raw: 28,
-        nonverbal_scaled: 656,
-    },
-    {
-        total_left_raw: 59,
-        total_left_scaled: 669,
-        total_right_raw: 27,
-        total_right_scaled: 558,
-        verbal_raw: 27,
-        verbal_scaled: 632,
-        nonverbal_raw: 27,
-        nonverbal_scaled: 646,
-    },
-    {
-        total_left_raw: 58,
-        total_left_scaled: 661,
-        total_right_raw: 26,
-        total_right_scaled: 556,
-        verbal_raw: 26,
-        verbal_scaled: 624,
-        nonverbal_raw: 26,
-        nonverbal_scaled: 637,
-    },
-    {
-        total_left_raw: 57,
-        total_left_scaled: 655,
-        total_right_raw: 25,
-        total_right_scaled: 553,
-        verbal_raw: 25,
-        verbal_scaled: 616,
-        nonverbal_raw: 25,
-        nonverbal_scaled: 630,
     },
 ];
 
@@ -139,129 +101,29 @@ function classNames(...values) {
     return values.filter(Boolean).join(" ");
 }
 
-function LevelsTable({ rows }) {
-    return (
-        <div className="overflow-x-auto">
-            <table className="min-w-full border-collapse">
-                <thead>
-                    <tr className="bg-slate-900 text-white">
-                        <th
-                            colSpan={4}
-                            className="border border-slate-700 px-4 py-3 text-center text-sm font-semibold"
-                        >
-                            Total
-                        </th>
-                        <th
-                            colSpan={2}
-                            className="border border-slate-700 px-4 py-3 text-center text-sm font-semibold"
-                        >
-                            Verbal
-                        </th>
-                        <th
-                            colSpan={2}
-                            className="border border-slate-700 px-4 py-3 text-center text-sm font-semibold"
-                        >
-                            Nonverbal
-                        </th>
-                    </tr>
-                    <tr className="bg-slate-800 text-white">
-                        <th className="border border-slate-700 px-3 py-3 text-center text-xs font-semibold">Raw Score</th>
-                        <th className="border border-slate-700 px-3 py-3 text-center text-xs font-semibold">Scaled Score</th>
-                        <th className="border border-slate-700 px-3 py-3 text-center text-xs font-semibold">Raw Score</th>
-                        <th className="border border-slate-700 px-3 py-3 text-center text-xs font-semibold">Scaled Score</th>
-                        <th className="border border-slate-700 px-3 py-3 text-center text-xs font-semibold">Raw Score</th>
-                        <th className="border border-slate-700 px-3 py-3 text-center text-xs font-semibold">Scaled Score</th>
-                        <th className="border border-slate-700 px-3 py-3 text-center text-xs font-semibold">Raw Score</th>
-                        <th className="border border-slate-700 px-3 py-3 text-center text-xs font-semibold">Scaled Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {rows.map((row, index) => (
-                        <tr
-                            key={index}
-                            className="odd:bg-white even:bg-slate-50 hover:bg-amber-50 transition-colors"
-                        >
-                            <td className="border border-slate-200 px-3 py-2 text-center text-sm font-semibold text-slate-900">
-                                {row.total_left_raw}
-                            </td>
-                            <td className="border border-slate-200 px-3 py-2 text-center text-sm text-slate-700">
-                                {row.total_left_scaled}
-                            </td>
-                            <td className="border border-slate-200 px-3 py-2 text-center text-sm font-semibold text-slate-900">
-                                {row.total_right_raw}
-                            </td>
-                            <td className="border border-slate-200 px-3 py-2 text-center text-sm text-slate-700">
-                                {row.total_right_scaled}
-                            </td>
-                            <td className="border border-slate-200 px-3 py-2 text-center text-sm font-semibold text-slate-900">
-                                {row.verbal_raw}
-                            </td>
-                            <td className="border border-slate-200 px-3 py-2 text-center text-sm text-slate-700">
-                                {row.verbal_scaled}
-                            </td>
-                            <td className="border border-slate-200 px-3 py-2 text-center text-sm font-semibold text-slate-900">
-                                {row.nonverbal_raw}
-                            </td>
-                            <td className="border border-slate-200 px-3 py-2 text-center text-sm text-slate-700">
-                                {row.nonverbal_scaled}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    );
-}
-
-function StandardTable({ rows }) {
-    return (
-        <div className="overflow-x-auto">
-            <table className="min-w-full">
-                <thead className="bg-slate-900 text-white">
-                    <tr>
-                        <th className="px-5 py-4 text-left text-sm font-semibold">Raw Score Band</th>
-                        <th className="px-5 py-4 text-left text-sm font-semibold">Scaled Score</th>
-                        <th className="px-5 py-4 text-left text-sm font-semibold">SAI</th>
-                        <th className="px-5 py-4 text-left text-sm font-semibold">Percentile Rank</th>
-                        <th className="px-5 py-4 text-left text-sm font-semibold">Stanine</th>
-                        <th className="px-5 py-4 text-left text-sm font-semibold">Interpretation</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {rows.map((row, index) => (
-                        <tr
-                            key={`${row.band}-${index}`}
-                            className="border-b border-slate-200 last:border-b-0 hover:bg-slate-50"
-                        >
-                            <td className="px-5 py-4 text-sm font-semibold text-slate-900">{row.band}</td>
-                            <td className="px-5 py-4 text-sm text-slate-700">{row.scaled}</td>
-                            <td className="px-5 py-4 text-sm text-slate-700">{row.sai}</td>
-                            <td className="px-5 py-4 text-sm text-slate-700">{row.rank}%</td>
-                            <td className="px-5 py-4 text-sm text-slate-700">{row.stanine}</td>
-                            <td className="px-5 py-4 text-sm text-slate-700">{row.verbal}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    );
-}
-
 export default function ConversionMatrixIndexMockup() {
     const [category, setCategory] = useState("levels");
-    const [selectedGroup, setSelectedGroup] = useState(CATEGORY_CONFIG.levels.options[0]);
+    const [selectedGroup, setSelectedGroup] = useState(
+        CATEGORY_CONFIG.levels.options[0]
+    );
     const [search, setSearch] = useState("");
     const [controlsOpen, setControlsOpen] = useState(true);
 
     const config = CATEGORY_CONFIG[category];
 
     const rows = useMemo(() => {
-        const source = category === "levels" ? LEVEL_ROWS : STANDARD_ROWS[category] ?? [];
+        const source =
+            category === "levels"
+                ? LEVEL_ROWS
+                : STANDARD_ROWS[category] ?? [];
+
         if (!search.trim()) return source;
 
         const q = search.toLowerCase();
         return source.filter((row) =>
-            Object.values(row).some((value) => String(value).toLowerCase().includes(q))
+            Object.values(row).some((value) =>
+                String(value).toLowerCase().includes(q)
+            )
         );
     }, [category, search]);
 
@@ -322,7 +184,7 @@ export default function ConversionMatrixIndexMockup() {
                                             onClick={() => handleCategoryChange(key)}
                                             className={classNames(
                                                 "rounded-2xl border px-4 py-4 text-left transition-all duration-200 ease-out",
-                                                "hover:-translate-y-1 hover:shadow-md hover:scale-[1.01]",
+                                                "hover:-translate-y-1 hover:scale-[1.01] hover:shadow-md",
                                                 "active:scale-[0.99]",
                                                 active
                                                     ? "border-[#7A1C1C] bg-[#7A1C1C] text-white shadow-sm"
@@ -353,6 +215,7 @@ export default function ConversionMatrixIndexMockup() {
                                         <p className="text-sm font-semibold text-slate-900">
                                             Select subgroup
                                         </p>
+
                                         <div className="mt-3 flex flex-wrap gap-2">
                                             {config.options.map((option) => (
                                                 <button
@@ -405,6 +268,7 @@ export default function ConversionMatrixIndexMockup() {
                                 <Filter className="h-4 w-4" />
                                 Filters
                             </button>
+
                             <button className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                                 <Pencil className="h-4 w-4" />
                                 Edit Matrix
@@ -413,13 +277,13 @@ export default function ConversionMatrixIndexMockup() {
                     </div>
 
                     {category === "levels" ? (
-                        <LevelsTable rows={rows} />
+                        <LevelConversionTable rows={rows} />
                     ) : (
                         <StandardTable rows={rows} />
                     )}
 
                     <div className="flex items-center justify-between border-t border-slate-200 px-5 py-4 text-sm text-slate-500">
-                        <span>Showing {rows.length} conversion bands</span>
+                        <span>Showing {rows.length} conversion rows</span>
                         <span>Source: Spring Multilevel Norms</span>
                     </div>
                 </div>

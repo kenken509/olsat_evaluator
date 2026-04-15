@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\RawScaledLevel;
 use Illuminate\Http\Request;
 
 class ConversionMatrixController extends Controller
@@ -10,10 +11,56 @@ class ConversionMatrixController extends Controller
     {
         return inertia('Admin/ConversionMatrix/Index', [
             'header' => [
-                'title' => 'OLSAT Spring  Norms',
-                'subtitle' => ' Manage score conversion references by category, subgroup, and interpretation.'
-
-            ]
+                'title' => 'Conversion Matrix',
+                'subtitle' => 'Manage score conversion references',
+            ],
         ]);
+    }
+
+    public function levelRows(Request $request)
+    {
+        $validated = $request->validate([
+            'level' => ['nullable', 'string', 'in:A,B,C,D,E,F,G'],
+            'per_page' => ['nullable', 'integer', 'in:10,20,50'],
+            'page' => ['nullable', 'integer'],
+        ]);
+
+        $level = $validated['level'] ?? 'E';
+        $perPage = $validated['per_page'] ?? 10;
+
+        $rows = RawScaledLevel::query()
+            ->where('level', $level)
+            ->orderByDesc('raw_score')
+            ->get();
+
+        $grouped = $rows
+            ->groupBy('raw_score')
+            ->map(function ($items, $rawScore) {
+                $total = $items->firstWhere('type', 'total');
+                $verbal = $items->firstWhere('type', 'verbal');
+                $nonverbal = $items->firstWhere('type', 'nonverbal');
+
+                return [
+                    'raw_score' => (int) $rawScore,
+                    'total_scaled' => $total?->scaled_score,
+                    'verbal_scaled' => $verbal?->scaled_score,
+                    'nonverbal_scaled' => $nonverbal?->scaled_score,
+                ];
+            })
+            ->values();
+
+        $page = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
+        $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
+            $grouped->forPage($page, $perPage)->values(),
+            $grouped->count(),
+            $perPage,
+            $page,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
+
+        return response()->json($paginated);
     }
 }
