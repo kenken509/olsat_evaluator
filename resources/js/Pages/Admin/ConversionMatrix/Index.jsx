@@ -12,7 +12,7 @@ const CATEGORY_CONFIG = {
     levels: {
         label: "Levels",
         color: "bg-violet-100 text-violet-700 border-violet-200",
-        options: ["Level E", "Level F", "Level G"],
+        options: ["Level D", "Level E", "Level F", "Level G"],
     },
     ages: {
         label: "Age",
@@ -31,39 +31,220 @@ const CATEGORY_CONFIG = {
     },
 };
 
-const SAMPLE_ROWS = {
-    levels: [
-        { band: "1-5", scaled: 31, sai: 82, rank: 12, stanine: 3, verbal: "Low Average" },
-        { band: "6-10", scaled: 37, sai: 91, rank: 28, stanine: 4, verbal: "Average" },
-        { band: "11-15", scaled: 43, sai: 101, rank: 52, stanine: 5, verbal: "Average" },
-        { band: "16-20", scaled: 49, sai: 110, rank: 74, stanine: 6, verbal: "High Average" },
-        { band: "21-25", scaled: 55, sai: 120, rank: 91, stanine: 8, verbal: "Superior" },
-    ],
+const LEVEL_ROWS = [
+    {
+        total_left_raw: 64,
+        total_left_scaled: 752,
+        total_right_raw: 32,
+        total_right_scaled: 571,
+        verbal_raw: 32,
+        verbal_scaled: 720,
+        nonverbal_raw: 32,
+        nonverbal_scaled: 734,
+    },
+    {
+        total_left_raw: 63,
+        total_left_scaled: 729,
+        total_right_raw: 31,
+        total_right_scaled: 569,
+        verbal_raw: 31,
+        verbal_scaled: 697,
+        nonverbal_raw: 31,
+        nonverbal_scaled: 710,
+    },
+    {
+        total_left_raw: 62,
+        total_left_scaled: 704,
+        total_right_raw: 30,
+        total_right_scaled: 566,
+        verbal_raw: 30,
+        verbal_scaled: 670,
+        nonverbal_raw: 30,
+        nonverbal_scaled: 684,
+    },
+    {
+        total_left_raw: 61,
+        total_left_scaled: 689,
+        total_right_raw: 29,
+        total_right_scaled: 564,
+        verbal_raw: 29,
+        verbal_scaled: 654,
+        nonverbal_raw: 29,
+        nonverbal_scaled: 668,
+    },
+    {
+        total_left_raw: 60,
+        total_left_scaled: 677,
+        total_right_raw: 28,
+        total_right_scaled: 561,
+        verbal_raw: 28,
+        verbal_scaled: 642,
+        nonverbal_raw: 28,
+        nonverbal_scaled: 656,
+    },
+    {
+        total_left_raw: 59,
+        total_left_scaled: 669,
+        total_right_raw: 27,
+        total_right_scaled: 558,
+        verbal_raw: 27,
+        verbal_scaled: 632,
+        nonverbal_raw: 27,
+        nonverbal_scaled: 646,
+    },
+    {
+        total_left_raw: 58,
+        total_left_scaled: 661,
+        total_right_raw: 26,
+        total_right_scaled: 556,
+        verbal_raw: 26,
+        verbal_scaled: 624,
+        nonverbal_raw: 26,
+        nonverbal_scaled: 637,
+    },
+    {
+        total_left_raw: 57,
+        total_left_scaled: 655,
+        total_right_raw: 25,
+        total_right_scaled: 553,
+        verbal_raw: 25,
+        verbal_scaled: 616,
+        nonverbal_raw: 25,
+        nonverbal_scaled: 630,
+    },
+];
+
+const STANDARD_ROWS = {
     ages: [
         { band: "1-5", scaled: 29, sai: 79, rank: 9, stanine: 2, verbal: "Below Average" },
         { band: "6-10", scaled: 35, sai: 88, rank: 21, stanine: 4, verbal: "Average" },
         { band: "11-15", scaled: 41, sai: 98, rank: 45, stanine: 5, verbal: "Average" },
         { band: "16-20", scaled: 47, sai: 108, rank: 69, stanine: 6, verbal: "High Average" },
-        { band: "21-25", scaled: 53, sai: 118, rank: 88, stanine: 8, verbal: "Superior" },
     ],
     gradeRank: [
         { band: "1-5", scaled: 30, sai: 81, rank: 10, stanine: 2, verbal: "Below Average" },
         { band: "6-10", scaled: 36, sai: 90, rank: 25, stanine: 4, verbal: "Average" },
         { band: "11-15", scaled: 42, sai: 100, rank: 50, stanine: 5, verbal: "Average" },
         { band: "16-20", scaled: 48, sai: 109, rank: 72, stanine: 6, verbal: "High Average" },
-        { band: "21-25", scaled: 54, sai: 119, rank: 89, stanine: 8, verbal: "Superior" },
     ],
     verbal: [
         { band: "1-5", scaled: 28, sai: 78, rank: 8, stanine: 2, verbal: "Below Average" },
         { band: "6-10", scaled: 34, sai: 87, rank: 20, stanine: 4, verbal: "Average" },
         { band: "11-15", scaled: 40, sai: 97, rank: 43, stanine: 5, verbal: "Average" },
         { band: "16-20", scaled: 46, sai: 106, rank: 67, stanine: 6, verbal: "High Average" },
-        { band: "21-25", scaled: 52, sai: 116, rank: 86, stanine: 8, verbal: "Superior" },
     ],
 };
 
 function classNames(...values) {
     return values.filter(Boolean).join(" ");
+}
+
+function LevelsTable({ rows }) {
+    return (
+        <div className="overflow-x-auto">
+            <table className="min-w-full border-collapse">
+                <thead>
+                    <tr className="bg-slate-900 text-white">
+                        <th
+                            colSpan={4}
+                            className="border border-slate-700 px-4 py-3 text-center text-sm font-semibold"
+                        >
+                            Total
+                        </th>
+                        <th
+                            colSpan={2}
+                            className="border border-slate-700 px-4 py-3 text-center text-sm font-semibold"
+                        >
+                            Verbal
+                        </th>
+                        <th
+                            colSpan={2}
+                            className="border border-slate-700 px-4 py-3 text-center text-sm font-semibold"
+                        >
+                            Nonverbal
+                        </th>
+                    </tr>
+                    <tr className="bg-slate-800 text-white">
+                        <th className="border border-slate-700 px-3 py-3 text-center text-xs font-semibold">Raw Score</th>
+                        <th className="border border-slate-700 px-3 py-3 text-center text-xs font-semibold">Scaled Score</th>
+                        <th className="border border-slate-700 px-3 py-3 text-center text-xs font-semibold">Raw Score</th>
+                        <th className="border border-slate-700 px-3 py-3 text-center text-xs font-semibold">Scaled Score</th>
+                        <th className="border border-slate-700 px-3 py-3 text-center text-xs font-semibold">Raw Score</th>
+                        <th className="border border-slate-700 px-3 py-3 text-center text-xs font-semibold">Scaled Score</th>
+                        <th className="border border-slate-700 px-3 py-3 text-center text-xs font-semibold">Raw Score</th>
+                        <th className="border border-slate-700 px-3 py-3 text-center text-xs font-semibold">Scaled Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {rows.map((row, index) => (
+                        <tr
+                            key={index}
+                            className="odd:bg-white even:bg-slate-50 hover:bg-amber-50 transition-colors"
+                        >
+                            <td className="border border-slate-200 px-3 py-2 text-center text-sm font-semibold text-slate-900">
+                                {row.total_left_raw}
+                            </td>
+                            <td className="border border-slate-200 px-3 py-2 text-center text-sm text-slate-700">
+                                {row.total_left_scaled}
+                            </td>
+                            <td className="border border-slate-200 px-3 py-2 text-center text-sm font-semibold text-slate-900">
+                                {row.total_right_raw}
+                            </td>
+                            <td className="border border-slate-200 px-3 py-2 text-center text-sm text-slate-700">
+                                {row.total_right_scaled}
+                            </td>
+                            <td className="border border-slate-200 px-3 py-2 text-center text-sm font-semibold text-slate-900">
+                                {row.verbal_raw}
+                            </td>
+                            <td className="border border-slate-200 px-3 py-2 text-center text-sm text-slate-700">
+                                {row.verbal_scaled}
+                            </td>
+                            <td className="border border-slate-200 px-3 py-2 text-center text-sm font-semibold text-slate-900">
+                                {row.nonverbal_raw}
+                            </td>
+                            <td className="border border-slate-200 px-3 py-2 text-center text-sm text-slate-700">
+                                {row.nonverbal_scaled}
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+
+function StandardTable({ rows }) {
+    return (
+        <div className="overflow-x-auto">
+            <table className="min-w-full">
+                <thead className="bg-slate-900 text-white">
+                    <tr>
+                        <th className="px-5 py-4 text-left text-sm font-semibold">Raw Score Band</th>
+                        <th className="px-5 py-4 text-left text-sm font-semibold">Scaled Score</th>
+                        <th className="px-5 py-4 text-left text-sm font-semibold">SAI</th>
+                        <th className="px-5 py-4 text-left text-sm font-semibold">Percentile Rank</th>
+                        <th className="px-5 py-4 text-left text-sm font-semibold">Stanine</th>
+                        <th className="px-5 py-4 text-left text-sm font-semibold">Interpretation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {rows.map((row, index) => (
+                        <tr
+                            key={`${row.band}-${index}`}
+                            className="border-b border-slate-200 last:border-b-0 hover:bg-slate-50"
+                        >
+                            <td className="px-5 py-4 text-sm font-semibold text-slate-900">{row.band}</td>
+                            <td className="px-5 py-4 text-sm text-slate-700">{row.scaled}</td>
+                            <td className="px-5 py-4 text-sm text-slate-700">{row.sai}</td>
+                            <td className="px-5 py-4 text-sm text-slate-700">{row.rank}%</td>
+                            <td className="px-5 py-4 text-sm text-slate-700">{row.stanine}</td>
+                            <td className="px-5 py-4 text-sm text-slate-700">{row.verbal}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
 }
 
 export default function ConversionMatrixIndexMockup() {
@@ -75,14 +256,12 @@ export default function ConversionMatrixIndexMockup() {
     const config = CATEGORY_CONFIG[category];
 
     const rows = useMemo(() => {
-        const source = SAMPLE_ROWS[category] ?? [];
+        const source = category === "levels" ? LEVEL_ROWS : STANDARD_ROWS[category] ?? [];
         if (!search.trim()) return source;
 
         const q = search.toLowerCase();
         return source.filter((row) =>
-            Object.values(row).some((value) =>
-                String(value).toLowerCase().includes(q)
-            )
+            Object.values(row).some((value) => String(value).toLowerCase().includes(q))
         );
     }, [category, search]);
 
@@ -94,10 +273,7 @@ export default function ConversionMatrixIndexMockup() {
 
     return (
         <AdminLayout>
-          
-              
-                
-            <div className="space-y-4 ">
+            <div className="space-y-4">
                 <div className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200">
                     <button
                         type="button"
@@ -135,41 +311,41 @@ export default function ConversionMatrixIndexMockup() {
 
                     {controlsOpen && (
                         <div className="border-t border-slate-200 bg-slate-50 p-3">
-                            
-                                <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
-                                    {Object.entries(CATEGORY_CONFIG).map(([key, item]) => {
-                                        const active = category === key;
+                            <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+                                {Object.entries(CATEGORY_CONFIG).map(([key, item]) => {
+                                    const active = category === key;
 
-                                        return (
-                                            <button
-                                                key={key}
-                                                type="button"
-                                                onClick={() => handleCategoryChange(key)}
+                                    return (
+                                        <button
+                                            key={key}
+                                            type="button"
+                                            onClick={() => handleCategoryChange(key)}
+                                            className={classNames(
+                                                "rounded-2xl border px-4 py-4 text-left transition-all duration-200 ease-out",
+                                                "hover:-translate-y-1 hover:shadow-md hover:scale-[1.01]",
+                                                "active:scale-[0.99]",
+                                                active
+                                                    ? "border-[#7A1C1C] bg-[#7A1C1C] text-white shadow-sm"
+                                                    : "border-slate-200 bg-white hover:bg-slate-100"
+                                            )}
+                                        >
+                                            <div className="text-sm font-semibold leading-tight">
+                                                {item.label}
+                                            </div>
+                                            <div
                                                 className={classNames(
-                                                    "rounded-2xl border px-4 py-4 text-left transition",
+                                                    "mt-2 inline-flex rounded-full border px-2 py-1 text-[11px] font-semibold",
                                                     active
-                                                        ? "border-[#7A1C1C] bg-[#7A1C1C] text-white shadow-sm"
-                                                        : "border-slate-200 bg-white hover:bg-slate-100"
+                                                        ? "border-white/30 bg-white/10 text-white"
+                                                        : item.color
                                                 )}
                                             >
-                                                <div className="text-sm font-semibold leading-tight">
-                                                    {item.label}
-                                                </div>
-                                                <div
-                                                    className={classNames(
-                                                        "mt-2 inline-flex rounded-full border px-2 py-1 text-[11px] font-semibold",
-                                                        active
-                                                            ? "border-white/30 bg-white/10 text-white"
-                                                            : item.color
-                                                    )}
-                                                >
-                                                    {item.options.length} groups
-                                                </div>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                         
+                                                {item.options.length} groups
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
 
                             <div className="mt-3 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
                                 <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
@@ -236,47 +412,11 @@ export default function ConversionMatrixIndexMockup() {
                         </div>
                     </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full">
-                            <thead className="bg-slate-900 text-white">
-                                <tr>
-                                    <th className="px-5 py-4 text-left text-sm font-semibold">Raw Score Band</th>
-                                    <th className="px-5 py-4 text-left text-sm font-semibold">Scaled Score</th>
-                                    <th className="px-5 py-4 text-left text-sm font-semibold">SAI</th>
-                                    <th className="px-5 py-4 text-left text-sm font-semibold">Percentile Rank</th>
-                                    <th className="px-5 py-4 text-left text-sm font-semibold">Stanine</th>
-                                    <th className="px-5 py-4 text-left text-sm font-semibold">Interpretation</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {rows.map((row, index) => (
-                                    <tr
-                                        key={`${row.band}-${index}`}
-                                        className="border-b border-slate-200 last:border-b-0 hover:bg-slate-50"
-                                    >
-                                        <td className="px-5 py-4 text-sm font-semibold text-slate-900">
-                                            {row.band}
-                                        </td>
-                                        <td className="px-5 py-4 text-sm text-slate-700">
-                                            {row.scaled}
-                                        </td>
-                                        <td className="px-5 py-4 text-sm text-slate-700">
-                                            {row.sai}
-                                        </td>
-                                        <td className="px-5 py-4 text-sm text-slate-700">
-                                            {row.rank}%
-                                        </td>
-                                        <td className="px-5 py-4 text-sm text-slate-700">
-                                            {row.stanine}
-                                        </td>
-                                        <td className="px-5 py-4 text-sm text-slate-700">
-                                            {row.verbal}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                    {category === "levels" ? (
+                        <LevelsTable rows={rows} />
+                    ) : (
+                        <StandardTable rows={rows} />
+                    )}
 
                     <div className="flex items-center justify-between border-t border-slate-200 px-5 py-4 text-sm text-slate-500">
                         <span>Showing {rows.length} conversion bands</span>
@@ -284,9 +424,6 @@ export default function ConversionMatrixIndexMockup() {
                     </div>
                 </div>
             </div>
-                  
-               
-            
         </AdminLayout>
     );
 }
