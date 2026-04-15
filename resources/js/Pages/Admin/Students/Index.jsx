@@ -4,9 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { FaRegEdit } from "react-icons/fa";
 import { MdOutlineDelete } from "react-icons/md";
 import Swal from "sweetalert2";
-
+import StudentsCreateModal from "./Components/StudentsCreateModal";
+import StudentsEditModal from "./Components/StudentsEditModal";
 
 export default function Index() {
+    const [editOpen, setEditOpen] = useState(false);
+    const [selectedStudent, setSelectedStudent] = useState(null);
     const [createOpen, setCreateOpen] = useState(false);
     const [students, setStudents] = useState([]);
     const [meta, setMeta] = useState(null);
@@ -16,7 +19,7 @@ export default function Index() {
 
     const [search, setSearch] = useState("");
     const [perPage, setPerPage] = useState(10);
-    const [view, setView] = useState("active"); // active | archived
+    const [view, setView] = useState("active");
 
     const debounceRef = useRef(null);
     const abortRef = useRef(null);
@@ -117,7 +120,6 @@ export default function Index() {
 
     const handleViewChange = (nextView) => {
         if (nextView === view) return;
-
         setView(nextView);
         setSearch("");
     };
@@ -174,19 +176,15 @@ export default function Index() {
                 confirmButtonColor: "#7A1C1C",
             });
 
-            const currentPage = meta?.current_page ?? 1;
-
             fetchStudents({
-                page: currentPage,
+                page: meta?.current_page ?? 1,
                 query: search,
                 per_page: perPage,
                 currentView: view,
             });
         } catch (error) {
             console.error(
-                isArchivedView
-                    ? "Failed to restore student:"
-                    : "Failed to archive student:",
+                isArchivedView ? "Failed to restore student:" : "Failed to archive student:",
                 error
             );
 
@@ -214,6 +212,23 @@ export default function Index() {
         });
     };
 
+    const handleEdit = (student) => {
+        setSelectedStudent(student);
+        setEditOpen(true);
+    };
+
+    const handleUpdated = () => {
+        setEditOpen(false);
+        setSelectedStudent(null);
+
+        fetchStudents({
+            page: meta?.current_page ?? 1,
+            query: search,
+            per_page: perPage,
+            currentView: view,
+        });
+    };
+    
     return (
         <AdminLayout>
             <div className="space-y-4">
@@ -292,12 +307,7 @@ export default function Index() {
 
                         <button
                             type="button"
-                            onClick={() => Swal.fire({
-                                icon: "info",
-                                title: "Not yet available",
-                                text: "Create student modal is not implemented yet.",
-                                confirmButtonColor: "#7A1C1C",
-                            })}
+                            onClick={() => setCreateOpen(true)}
                             className="rounded-xl bg-secondary px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 cursor-pointer"
                         >
                             + New
@@ -332,20 +342,16 @@ export default function Index() {
                                     students.map((student) => (
                                         <tr
                                             key={student.id}
-                                            className="border-b border-primary/10 last:border-b-0 hover:bg-app"
+                                            className="border-b border-primary/10 last:border-b-0 hover:bg-gray-50 "
                                         >
-                                            <td className="px-6 py-4 text-sm text-app">
-                                                {student.id}
-                                            </td>
+                                            <td className="px-6 py-4 text-sm text-app">{student.id}</td>
                                             <td className="px-6 py-4 text-sm font-semibold text-app">
                                                 {student.student_id}
                                             </td>
                                             <td className="px-6 py-4 text-sm text-app">
                                                 {student.fname} {student.mname ? `${student.mname} ` : ""}{student.lname}
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-app">
-                                                {student.sex}
-                                            </td>
+                                            <td className="px-6 py-4 text-sm text-app">{student.sex}</td>
                                             <td className="px-6 py-4 text-sm text-app">
                                                 Grade {student.incoming_grade_level}
                                             </td>
@@ -371,6 +377,7 @@ export default function Index() {
                                                 <div className="flex items-center justify-center gap-4">
                                                     <button
                                                         type="button"
+                                                        onClick={() => handleEdit(student)}
                                                         className="cursor-pointer"
                                                         title="Edit"
                                                     >
@@ -430,11 +437,21 @@ export default function Index() {
                     </div>
                 )}
 
-                {/* <StudentsCreateModal
+                <StudentsCreateModal
                     open={createOpen}
                     onClose={() => setCreateOpen(false)}
                     onCreated={handleCreated}
-                /> */}
+                />
+
+                <StudentsEditModal
+                    open={editOpen}
+                    student={selectedStudent}
+                    onClose={() => {
+                        setEditOpen(false);
+                        setSelectedStudent(null);
+                    }}
+                    onUpdated={handleUpdated}
+                />
             </div>
         </AdminLayout>
     );

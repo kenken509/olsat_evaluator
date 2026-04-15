@@ -46,8 +46,9 @@ class StudentsController extends Controller
                         ->orWhere('previous_school', 'like', "%{$query}%");
                 });
             })
-            ->orderBy('lname')
-            ->orderBy('fname')
+            // ->orderBy('lname')
+            // ->orderBy('fname')
+            ->orderBy('id', 'desc')
             ->paginate($perPage)
             ->withQueryString();
 

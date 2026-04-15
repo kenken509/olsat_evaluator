@@ -13,7 +13,7 @@ export default function Sidebar({ open, setOpen }) {
         { label: "Dashboard", href: "/admin-panel/dashboard", icon: <AiOutlineDashboard /> },
         { label: "Users", href: "/admin-panel/users", icon: <FiUsers /> },
         { label: "Students", href: "/admin-panel/students", icon: <PiStudentLight /> },
-        { label: "Conversion Matrix", href: "/admin/matrix", icon: <CiViewTable /> },
+        { label: "Conversion Matrix", href: "/admin-panel/conversion-matrix", icon: <CiViewTable /> },
         { label: "Evaluator", href: "/evaluator", icon: <LuArrowLeftRight /> },
         { label: "Audit Logs", href: "/admin-panel/audit-logs", icon: <IoShieldCheckmarkOutline /> },
         { label: "Settings", href: "/admin/settings", icon: <FiSettings /> },

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AuditLogsController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ConversionMatrixController;
 use App\Http\Controllers\ConversionTableController;
 use App\Http\Controllers\EvaluatorController;
 use App\Http\Controllers\StudentsController;
@@ -62,4 +63,8 @@ Route::middleware(['auth', 'admin'])->controller(UsersController::class)->group(
 Route::middleware(['auth', 'admin'])->controller(AuditLogsController::class)->group(function () {
     Route::get('/admin-panel/audit-logs', 'index');
     Route::get('/admin-panel/audit-logs-data', 'getData');
+});
+
+Route::middleware(['auth', 'admin'])->controller(ConversionMatrixController::class)->group(function () {
+    Route::get('/admin-panel/conversion-matrix', 'index');
 });
