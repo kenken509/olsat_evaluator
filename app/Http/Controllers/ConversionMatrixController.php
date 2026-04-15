@@ -10,8 +10,9 @@ class ConversionMatrixController extends Controller
     {
         return inertia('Admin/ConversionMatrix/Index', [
             'header' => [
-                'title' => 'Conversion Matrix',
-                'subtitle' => 'List of conversion matrix'
+                'title' => 'OLSAT Spring  Norms',
+                'subtitle' => ' Manage score conversion references by category, subgroup, and interpretation.'
+
             ]
         ]);
     }
