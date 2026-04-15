@@ -44,6 +44,11 @@ Route::middleware(['auth', 'admin'])->controller(UsersController::class)->group(
 
 Route::middleware(['auth', 'admin'])->controller(StudentsController::class)->group(function () {
     Route::get('/admin-panel/students', 'index');
+    Route::get('/admin-panel/students-all', 'allStudents');
+    Route::post('/admin-panel/students', 'store');
+    Route::put('/admin-panel/students/{student}', 'update');
+    Route::delete('/admin-panel/students/{student}', 'destroy');
+    Route::patch('/admin-panel/students/{id}/restore', 'restore');
 });
 
 Route::middleware(['auth', 'admin'])->controller(UsersController::class)->group(function () {

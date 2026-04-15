@@ -41,6 +41,7 @@ use Database\Seeders\RawScaledLevelDSeeder;
 use Database\Seeders\RawScaledLevelESeeder;
 use Database\Seeders\RawScaledLevelFSeeder;
 use Database\Seeders\RawScaledLevelGSeeder;
+use Database\Seeders\StudentSeeder;
 use Database\Seeders\UserSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -103,6 +104,7 @@ class DatabaseSeeder extends Seeder
             Age18TotalSeeder::class,
             Age18VerbalSeeder::class,
             Age18NonVerbalSeeder::class,
+            StudentSeeder::class,
         ]);
     }
 }
