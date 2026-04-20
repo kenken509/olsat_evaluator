@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import {
     Search,
     Filter,
@@ -19,12 +20,34 @@ const CATEGORY_CONFIG = {
     ages: {
         label: "Age",
         color: "bg-sky-100 text-sky-700 border-sky-200",
-        options: ["8 y/o", "9 y/o", "10 y/o", "11 y/o", "12 y/o", "13 y/o", "14 y/o", "15 y/o", "16 y/o", "17 y/o", "18 y/o"],
+        options: [
+            "8 y/o",
+            "9 y/o",
+            "10 y/o",
+            "11 y/o",
+            "12 y/o",
+            "13 y/o",
+            "14 y/o",
+            "15 y/o",
+            "16 y/o",
+            "17 y/o",
+            "18 y/o",
+        ],
     },
     gradeRank: {
         label: "Grade Rank / Stanine",
         color: "bg-amber-100 text-amber-800 border-amber-200",
-        options: ["Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12"],
+        options: [
+            "Grade 4",
+            "Grade 5",
+            "Grade 6",
+            "Grade 7",
+            "Grade 8",
+            "Grade 9",
+            "Grade 10",
+            "Grade 11",
+            "Grade 12",
+        ],
     },
     verbal: {
         label: "Verbal Interpretation",
@@ -32,49 +55,6 @@ const CATEGORY_CONFIG = {
         options: ["Grade 4-7", "Grade 8-10", "Grade 11-12"],
     },
 };
-
-const LEVEL_ROWS = [
-    {
-        total_raw_1: 64,
-        total_scaled_1: 752,
-        total_raw_2: 32,
-        total_scaled_2: 571,
-        verbal_raw: 32,
-        verbal_scaled: 720,
-        nonverbal_raw: 32,
-        nonverbal_scaled: 734,
-    },
-    {
-        total_raw_1: 63,
-        total_scaled_1: 729,
-        total_raw_2: 31,
-        total_scaled_2: 569,
-        verbal_raw: 31,
-        verbal_scaled: 697,
-        nonverbal_raw: 31,
-        nonverbal_scaled: 710,
-    },
-    {
-        total_raw_1: 62,
-        total_scaled_1: 704,
-        total_raw_2: 30,
-        total_scaled_2: 566,
-        verbal_raw: 30,
-        verbal_scaled: 670,
-        nonverbal_raw: 30,
-        nonverbal_scaled: 684,
-    },
-    {
-        total_raw_1: 61,
-        total_scaled_1: 689,
-        total_raw_2: 29,
-        total_scaled_2: 564,
-        verbal_raw: 29,
-        verbal_scaled: 654,
-        nonverbal_raw: 29,
-        nonverbal_scaled: 668,
-    },
-];
 
 const STANDARD_ROWS = {
     ages: [
@@ -101,36 +81,94 @@ function classNames(...values) {
     return values.filter(Boolean).join(" ");
 }
 
+function getLevelCode(label) {
+    const match = label.match(/Level\s+([A-G])/i);
+    return match ? match[1].toUpperCase() : "E";
+}
+
 export default function ConversionMatrixIndexMockup() {
     const [category, setCategory] = useState("levels");
-    const [selectedGroup, setSelectedGroup] = useState(
-        CATEGORY_CONFIG.levels.options[0]
-    );
+    const [selectedGroup, setSelectedGroup] = useState(CATEGORY_CONFIG.levels.options[0]);
     const [search, setSearch] = useState("");
     const [controlsOpen, setControlsOpen] = useState(true);
 
+    const [apiRows, setApiRows] = useState([]);
+    const [pagination, setPagination] = useState({
+        current_page: 1,
+        per_page: 10,
+        total: 0,
+        last_page: 1,
+    });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
     const config = CATEGORY_CONFIG[category];
 
+    const fetchLevelRows = useCallback(async (level, page = 1, perPage = 10) => {
+        try {
+            setLoading(true);
+            setError("");
+
+            const response = await axios.get("/admin-panel/conversion-matrix/levels", {
+                params: {
+                    level,
+                    page,
+                    per_page: perPage,
+                },
+            });
+
+            const payload = response.data;
+
+            setApiRows(payload.data ?? []);
+            setPagination({
+                current_page: payload.current_page ?? 1,
+                per_page: payload.per_page ?? perPage,
+                total: payload.total ?? 0,
+                last_page: payload.last_page ?? 1,
+            });
+        } catch (err) {
+            console.error("Failed to fetch level rows:", err);
+            setApiRows([]);
+            setError(err?.response?.data?.message || "Failed to load conversion rows.");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (category !== "levels") return;
+
+        const levelCode = getLevelCode(selectedGroup);
+        fetchLevelRows(levelCode, 1, pagination.per_page);
+    }, [category, selectedGroup, fetchLevelRows]);
+
     const rows = useMemo(() => {
-        const source =
-            category === "levels"
-                ? LEVEL_ROWS
-                : STANDARD_ROWS[category] ?? [];
+        const source = category === "levels" ? apiRows : STANDARD_ROWS[category] ?? [];
 
         if (!search.trim()) return source;
 
         const q = search.toLowerCase();
+
         return source.filter((row) =>
             Object.values(row).some((value) =>
-                String(value).toLowerCase().includes(q)
+                String(value ?? "").toLowerCase().includes(q)
             )
         );
-    }, [category, search]);
+    }, [category, apiRows, search]);
 
     const handleCategoryChange = (next) => {
         setCategory(next);
         setSelectedGroup(CATEGORY_CONFIG[next].options[0]);
         setSearch("");
+        setError("");
+    };
+
+    const handlePageChange = (nextPage) => {
+        if (category !== "levels") return;
+        if (nextPage < 1 || nextPage > pagination.last_page) return;
+
+        const levelCode = getLevelCode(selectedGroup);
+        fetchLevelRows(levelCode, nextPage, pagination.per_page);
     };
 
     return (
@@ -140,7 +178,7 @@ export default function ConversionMatrixIndexMockup() {
                     <button
                         type="button"
                         onClick={() => setControlsOpen((prev) => !prev)}
-                        className="flex w-full items-center justify-between px-5 py-4 text-left"
+                        className="flex w-full items-center justify-between px-5 py-4 text-left cursor-pointer"
                     >
                         <div className="flex items-center gap-3">
                             <span
@@ -213,7 +251,7 @@ export default function ConversionMatrixIndexMockup() {
                                 <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                                     <div className="flex-1">
                                         <p className="text-sm font-semibold text-slate-900">
-                                            Select subgroup
+                                            Select subgroup || {category}
                                         </p>
 
                                         <div className="mt-3 flex flex-wrap gap-2">
@@ -276,16 +314,56 @@ export default function ConversionMatrixIndexMockup() {
                         </div>
                     </div>
 
-                    {category === "levels" ? (
+                    {error && (
+                        <div className="px-5 py-3 text-sm text-red-600">
+                            {error}
+                        </div>
+                    )}
+
+                    {loading ? (
+                        <div className="px-5 py-8 text-sm text-slate-500">
+                            Loading conversion rows...
+                        </div>
+                    ) : category === "levels" ? (
                         <LevelConversionTable rows={rows} />
                     ) : (
                         <StandardTable rows={rows} />
                     )}
 
                     <div className="flex items-center justify-between border-t border-slate-200 px-5 py-4 text-sm text-slate-500">
-                        <span>Showing {rows.length} conversion rows</span>
+                        <span>
+                            Showing {rows.length} of{" "}
+                            {category === "levels" ? pagination.total : rows.length} conversion rows
+                        </span>
+
                         <span>Source: Spring Multilevel Norms</span>
                     </div>
+
+                    {category === "levels" && pagination.last_page > 1 && (
+                        <div className="flex items-center justify-end gap-2 border-t border-slate-200 px-5 py-4">
+                            <button
+                                type="button"
+                                onClick={() => handlePageChange(pagination.current_page - 1)}
+                                disabled={pagination.current_page <= 1 || loading}
+                                className="rounded-xl border border-slate-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                            >
+                                Previous
+                            </button>
+
+                            <span className="text-sm text-slate-600">
+                                Page {pagination.current_page} of {pagination.last_page}
+                            </span>
+
+                            <button
+                                type="button"
+                                onClick={() => handlePageChange(pagination.current_page + 1)}
+                                disabled={pagination.current_page >= pagination.last_page || loading}
+                                className="rounded-xl border border-slate-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </AdminLayout>

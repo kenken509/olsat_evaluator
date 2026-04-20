@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RawScaledLevel;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ConversionMatrixController extends Controller
 {
@@ -19,14 +20,16 @@ class ConversionMatrixController extends Controller
 
     public function levelRows(Request $request)
     {
+
         $validated = $request->validate([
             'level' => ['nullable', 'string', 'in:A,B,C,D,E,F,G'],
             'per_page' => ['nullable', 'integer', 'in:10,20,50'],
-            'page' => ['nullable', 'integer'],
+            'page' => ['nullable', 'integer', 'min:1'],
         ]);
 
         $level = $validated['level'] ?? 'E';
-        $perPage = $validated['per_page'] ?? 10;
+        $perPage = $validated['per_page'] ?? 50;
+        $page = $validated['page'] ?? LengthAwarePaginator::resolveCurrentPage();
 
         $rows = RawScaledLevel::query()
             ->where('level', $level)
@@ -49,8 +52,7 @@ class ConversionMatrixController extends Controller
             })
             ->values();
 
-        $page = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
-        $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
+        $paginated = new LengthAwarePaginator(
             $grouped->forPage($page, $perPage)->values(),
             $grouped->count(),
             $perPage,
