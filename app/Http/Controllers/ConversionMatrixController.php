@@ -23,7 +23,7 @@ class ConversionMatrixController extends Controller
 
         $validated = $request->validate([
             'level' => ['nullable', 'string', 'in:A,B,C,D,E,F,G'],
-            'per_page' => ['nullable', 'integer', 'in:10,20,50'],
+            'per_page' => ['nullable', 'integer', 'in:5,10,20,50'],
             'page' => ['nullable', 'integer', 'min:1'],
         ]);
 

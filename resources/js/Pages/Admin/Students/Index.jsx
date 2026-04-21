@@ -6,6 +6,7 @@ import { MdOutlineDelete } from "react-icons/md";
 import Swal from "sweetalert2";
 import StudentsCreateModal from "./Components/StudentsCreateModal";
 import StudentsEditModal from "./Components/StudentsEditModal";
+import Pagination from "../../../Components/Pagination";
 
 export default function Index() {
     const [editOpen, setEditOpen] = useState(false);
@@ -417,25 +418,7 @@ export default function Index() {
                     </div>
                 </div>
 
-                {meta?.links?.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                        {meta.links.map((link, index) => (
-                            <button
-                                key={index}
-                                disabled={!link.url}
-                                onClick={() => goToPage(link.url)}
-                                className={[
-                                    "rounded-xl border px-4 py-2 text-sm font-semibold transition",
-                                    link.active
-                                        ? "border-primary bg-primary text-white"
-                                        : "border-primary/20 bg-white text-primary hover:bg-app",
-                                    !link.url ? "cursor-not-allowed opacity-50" : "cursor-pointer",
-                                ].join(" ")}
-                                dangerouslySetInnerHTML={{ __html: link.label }}
-                            />
-                        ))}
-                    </div>
-                )}
+                <Pagination links={meta?.links} onPageChange={goToPage} />
 
                 <StudentsCreateModal
                     open={createOpen}
