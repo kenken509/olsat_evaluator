@@ -1,5 +1,4 @@
     import React, { useCallback, useEffect, useMemo, useState } from "react";
-    import axios from "axios";
     import {
         Search,
         Filter,
@@ -12,6 +11,12 @@
     import StandardTable from "./Components/StandardTable";
     import Pagination from "../../../Components/Pagination";
     import LevelConversionTableSkeleton from "./Components/LevelConversionTableSkeleton";
+    import AgeConversionTable from "./Components/AgeConversionTable";
+    import AgeConversionTableSkeleton from "./Components/AgeConversionTableSkeleton";
+    import {
+        fetchConversionMatrixRows,
+        supportsRemoteCategory,
+    } from "./services/conversionMatrixService";
     
 
     const CATEGORY_CONFIG = {
@@ -35,6 +40,13 @@
                 "16 y/o",
                 "17 y/o",
                 "18 y/o",
+            ],
+        },
+        Sai_Percentile_Rank_and_Stanine:{
+            label: "SAI Rank / Stanine",
+            color: "bg-sky-100 text-sky-700 border-sky-200",
+             options: [
+                "General"
             ],
         },
         gradeRank: {
@@ -84,10 +96,9 @@
         return values.filter(Boolean).join(" ");
     }
 
-    function getLevelCode(label) {
-        const match = label.match(/Level\s+([A-G])/i);
-        return match ? match[1].toUpperCase() : "E";
-    }
+  
+
+  
 
     export default function ConversionMatrixIndexMockup() {
         const [category, setCategory] = useState("levels");
@@ -107,46 +118,53 @@
 
         const config = CATEGORY_CONFIG[category];
 
-        const fetchLevelRows = useCallback(async (level, page = 1, nextPerPage = perPage) => {
-            try {
-                setLoading(true);
-                setError("");
+       const fetchCategoryRows = useCallback(
+            async ({
+                nextCategory = category,
+                nextGroup = selectedGroup,
+                page = 1,
+                nextPerPage = perPage,
+            } = {}) => {
+                if (!supportsRemoteCategory(nextCategory)) return;
 
-                const response = await axios.get("/admin-panel/conversion-matrix/levels", {
-                    params: {
-                        level,
+                try {
+                    setLoading(true);
+                    setError("");
+                     
+                    const result = await fetchConversionMatrixRows({
+                        category: nextCategory,
+                        selectedGroup: nextGroup,
                         page,
-                        per_page: nextPerPage,
-                    },
-                });
-
-                const payload = response.data;
-
-                setApiRows(payload.data ?? []);
-                setPagination({
-                    current_page: payload.current_page ?? 1,
-                    per_page: payload.per_page ?? perPage,
-                    total: payload.total ?? 0,
-                    last_page: payload.last_page ?? 1,
-                });
-            } catch (err) {
-                console.error("Failed to fetch level rows:", err);
-                setApiRows([]);
-                setError(err?.response?.data?.message || "Failed to load conversion rows.");
-            } finally {
-                setLoading(false);
-            }
-        }, []);
+                        perPage: nextPerPage,
+                    });
+                    
+                    setApiRows(result.rows);
+                    setPagination(result.pagination);
+                } catch (err) {
+                    console.error(`Failed to fetch ${nextCategory} rows:`, err);
+                    setApiRows([]);
+                    setError(err?.response?.data?.message || "Failed to load conversion rows.");
+                } finally {
+                    setLoading(false);
+                }
+            },
+            [category, selectedGroup, perPage]
+        );
 
         useEffect(() => {
-            if (category !== "levels") return;
-
-            const levelCode = getLevelCode(selectedGroup);
-            fetchLevelRows(levelCode, 1, perPage);
-        }, [category, selectedGroup, fetchLevelRows]);
+            fetchCategoryRows({
+                nextCategory: category,
+                nextGroup: selectedGroup,
+                page: 1,
+                nextPerPage: perPage,
+            });
+            
+        }, [category, selectedGroup, perPage, fetchCategoryRows]);
 
         const rows = useMemo(() => {
-            const source = category === "levels" ? apiRows : STANDARD_ROWS[category] ?? [];
+            const source = supportsRemoteCategory(category)
+                ? apiRows
+                : STANDARD_ROWS[category] ?? [];
 
             if (!search.trim()) return source;
 
@@ -160,6 +178,7 @@
         }, [category, apiRows, search]);
 
         const handleCategoryChange = (next) => {
+            
             setCategory(next);
             setSelectedGroup(CATEGORY_CONFIG[next].options[0]);
             setSearch("");
@@ -167,22 +186,32 @@
         };
 
         const handlePageChange = (nextPage) => {
-            if (category !== "levels") return;
             if (nextPage < 1 || nextPage > pagination.last_page) return;
 
-            const levelCode = getLevelCode(selectedGroup);
-            fetchLevelRows(levelCode, nextPage, pagination.per_page);
+            fetchCategoryRows({
+                nextCategory: category,
+                nextGroup: selectedGroup,
+                page: nextPage,
+                nextPerPage: pagination.per_page,
+            });
         };
 
         const handlePerPageChange = (e) => {
             const value = Number(e.target.value);
             setPerPage(value);
 
-            if (category !== "levels") return;
-
-            const levelCode = getLevelCode(selectedGroup);
-            fetchLevelRows(levelCode, 1, value);
+            fetchCategoryRows({
+                nextCategory: category,
+                nextGroup: selectedGroup,
+                page: 1,
+                nextPerPage: value,
+            });
         };
+
+        function getLevelCode(label) {
+            const match = label.match(/Level\s+([A-G])/i);
+            return match ? match[1].toUpperCase() : "E";
+        }
 
         return (
             <AdminLayout>
@@ -224,7 +253,7 @@
 
                         {controlsOpen && (
                             <div className="border-t border-slate-200 bg-slate-50 p-3">
-                                <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+                                <div className="grid grid-cols-1 gap-2 lg:grid-cols-5">
                                     {Object.entries(CATEGORY_CONFIG).map(([key, item]) => {
                                         const active = category === key;
 
@@ -315,7 +344,7 @@
                             </div>
 
                             <div className="flex flex-wrap items-center gap-2">
-                                {category === "levels" && (
+                               {supportsRemoteCategory(category) && (
                                     <div className="flex items-center gap-2">
                                         <label className="text-sm font-semibold text-slate-600">
                                             Show Entries
@@ -324,7 +353,7 @@
                                         <select
                                             value={perPage}
                                             onChange={handlePerPageChange}
-                                            className="rounded-2xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 outline-none transition cursor-pointer "
+                                            className="rounded-2xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 outline-none transition cursor-pointer"
                                         >
                                             <option value={5}>5</option>
                                             <option value={10}>10</option>
@@ -353,15 +382,19 @@
                         )}
 
                         {loading ? (
-                                category === "levels" ? (
-                                    <LevelConversionTableSkeleton rows={pagination.per_page || 10} />
-                                ) : (
-                                    <div className="px-5 py-8 text-sm text-slate-500">
-                                        Loading conversion rows...
-                                    </div>
-                                )
+                            category === "levels" ? (
+                                <LevelConversionTableSkeleton rows={pagination.per_page || 10} />
+                            ) : category === "ages" ? (
+                                <AgeConversionTableSkeleton rows={pagination.per_page || 5} />
+                            ) : (
+                                <div className="px-5 py-8 text-sm text-slate-500">
+                                    Loading conversion rows...
+                                </div>
+                            )
                             ) : category === "levels" ? (
                                 <LevelConversionTable rows={rows} />
+                            ) : category === "ages" ? (
+                                <AgeConversionTable rows={rows} />
                             ) : (
                                 <StandardTable rows={rows} />
                             )
@@ -370,10 +403,10 @@
                         <div className="flex items-center justify-between border-t border-slate-200 px-5 py-4 text-sm text-slate-500">
                             <span>
                                 Showing {rows.length} of{" "}
-                                {category === "levels" ? pagination.total : rows.length} conversion rows
+                                {supportsRemoteCategory(category) ? pagination.total : rows.length} conversion rows
                             </span>
 
-                            {category === "levels" && (
+                            {supportsRemoteCategory(category) && (
                                 <Pagination
                                     currentPage={pagination.current_page}
                                     lastPage={pagination.last_page}

@@ -8,6 +8,7 @@ import StudentsCreateModal from "./Components/StudentsCreateModal";
 import StudentsEditModal from "./Components/StudentsEditModal";
 import Pagination from "../../../Components/Pagination";
 
+
 export default function Index() {
     const [editOpen, setEditOpen] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState(null);

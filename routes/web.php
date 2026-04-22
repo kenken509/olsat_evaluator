@@ -68,4 +68,5 @@ Route::middleware(['auth', 'admin'])->controller(AuditLogsController::class)->gr
 Route::middleware(['auth', 'admin'])->controller(ConversionMatrixController::class)->group(function () {
     Route::get('/admin-panel/conversion-matrix', 'index');
     Route::get('/admin-panel/conversion-matrix/levels', 'levelRows');
+    Route::get('/admin-panel/conversion-matrix/ages', 'ageRows');
 });
