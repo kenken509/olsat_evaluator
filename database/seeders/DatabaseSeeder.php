@@ -33,7 +33,26 @@ use Database\Seeders\Age17NonVerbalSeeder;
 use Database\Seeders\Age17TotalSeeder;
 use Database\Seeders\Age17VerbalSeeder;
 use Database\Seeders\Age18NonVerbalSeeder;
+use Database\Seeders\Age18TotalSeeder;
 use Database\Seeders\Age18VerbalSeeder;
+use Database\Seeders\Grade4ClusterPerformanceCategorySeeder;
+use Database\Seeders\Grade4GradeRankStanineSeeder;
+use Database\Seeders\Grade5ClusterPerformanceCategorySeeder;
+use Database\Seeders\Grade5GradeRankStanineSeeder;
+use Database\Seeders\Grade6ClusterPerformanceCategorySeeder;
+use Database\Seeders\Grade6GradeRankStanineSeeder;
+use Database\Seeders\Grade7ClusterPerformanceCategorySeeder;
+use Database\Seeders\Grade7GradeRankStanineSeeder;
+use Database\Seeders\Grade8ClusterPerformanceCategorySeeder;
+use Database\Seeders\Grade8GradeRankStanineSeeder;
+use Database\Seeders\Grade9ClusterPerformanceCategorySeeder;
+use Database\Seeders\Grade9GradeRankStanineSeeder;
+use Database\Seeders\Grade10ClusterPerformanceCategorySeeder;
+use Database\Seeders\Grade10GradeRankStanineSeeder;
+use Database\Seeders\Grade11ClusterPerformanceCategorySeeder;
+use Database\Seeders\Grade11GradeRankStanineSeeder;
+use Database\Seeders\Grade12ClusterPerformanceCategorySeeder;
+use Database\Seeders\Grade12GradeRankStanineSeeder;
 use Database\Seeders\RawScaledLevelASeeder;
 use Database\Seeders\RawScaledLevelBseeder;
 use Database\Seeders\RawScaledLevelCSeeder;
@@ -107,6 +126,24 @@ class DatabaseSeeder extends Seeder
             Age18NonVerbalSeeder::class,
             StudentSeeder::class,
             SaiPercentileRankStanineSeeder::class,
+            Grade4GradeRankStanineSeeder::class,
+            Grade5GradeRankStanineSeeder::class,
+            Grade6GradeRankStanineSeeder::class,
+            Grade7GradeRankStanineSeeder::class,
+            Grade8GradeRankStanineSeeder::class,
+            Grade9GradeRankStanineSeeder::class,
+            Grade10GradeRankStanineSeeder::class,
+            Grade11GradeRankStanineSeeder::class,
+            Grade12GradeRankStanineSeeder::class,
+            Grade4ClusterPerformanceCategorySeeder::class,
+            Grade5ClusterPerformanceCategorySeeder::class,
+            Grade6ClusterPerformanceCategorySeeder::class,
+            Grade7ClusterPerformanceCategorySeeder::class,
+            Grade8ClusterPerformanceCategorySeeder::class,
+            Grade9ClusterPerformanceCategorySeeder::class,
+            Grade10ClusterPerformanceCategorySeeder::class,
+            Grade11ClusterPerformanceCategorySeeder::class,
+            Grade12ClusterPerformanceCategorySeeder::class,
         ]);
     }
 }

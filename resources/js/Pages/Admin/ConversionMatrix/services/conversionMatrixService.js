@@ -40,7 +40,7 @@ const CATEGORY_REQUEST_MAP = {
         }),
     },
 
-    Sai_Percentile_Rank_and_Stanine: {
+    saiRankStanine: {
         url: "/admin-panel/conversion-matrix/sai-rank-stanine",
         buildParams: ({ page, perPage }) => ({
             page,
@@ -51,16 +51,20 @@ const CATEGORY_REQUEST_MAP = {
     gradeRank: {
         url: "/admin-panel/conversion-matrix/grade-rank",
         buildParams: ({ selectedGroup, page, perPage }) => ({
-            grade_rank: getGradeRankValue(selectedGroup),
+            grade: String(selectedGroup || "")
+                .replace(/^Grade\s+/i, "")
+                .trim(),
             page,
             per_page: perPage,
         }),
     },
 
-    verbal: {
-        url: "/admin-panel/conversion-matrix/verbal",
+    clusterPerformance: {
+        url: "/admin-panel/conversion-matrix/cluster-performance",
         buildParams: ({ selectedGroup, page, perPage }) => ({
-            verbal: getVerbalValue(selectedGroup),
+            grade: String(selectedGroup || "")
+                .replace(/^Grade\s+/i, "")
+                .trim(),
             page,
             per_page: perPage,
         }),

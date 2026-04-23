@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\ScaledScoresToSai;
 use App\Models\SaiPercentileRankAndStanine;
+use App\Models\GradeRankStanine;
+use App\Models\ClusterPerformanceCategory;
 
 
 class ConversionMatrixController extends Controller
@@ -71,6 +73,7 @@ class ConversionMatrixController extends Controller
 
     public function ageRows(Request $request)
     {
+
         $validated = $request->validate([
             'age' => ['nullable', 'integer', 'in:8,9,10,11,12,13,14,15,16,17,18'],
             'per_page' => ['nullable', 'integer', 'in:5,10,20,50'],
@@ -176,6 +179,145 @@ class ConversionMatrixController extends Controller
                     'label' => (int) $row->sai === 58 ? '58 and below' : (string) $row->sai,
                     'percentile_rank' => (int) $row->percentile_rank,
                     'stanine' => (int) $row->stanine,
+                ];
+            })
+            ->values();
+
+        $paginated = new LengthAwarePaginator(
+            $rows->forPage($page, $perPage)->values(),
+            $rows->count(),
+            $perPage,
+            $page,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
+
+        return response()->json($paginated);
+    }
+
+    public function gradeRankRows(Request $request)
+    {
+        $validated = $request->validate([
+            'grade' => ['nullable', 'integer', 'in:4,5,6,7,8,9,10,11,12'],
+            'per_page' => ['nullable', 'integer', 'in:5,10,20,50'],
+            'page' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        $grade = $validated['grade'] ?? 4;
+        $perPage = $validated['per_page'] ?? 10;
+        $page = $validated['page'] ?? LengthAwarePaginator::resolveCurrentPage();
+
+        $rows = GradeRankStanine::query()
+            ->where('grade', $grade)
+            ->orderByDesc('percentile_rank')
+            ->orderByDesc('stanine')
+            ->get();
+
+        $formatRange = function ($row) {
+            if (! $row || $row->min_scaled_score === null || $row->max_scaled_score === null) {
+                return null;
+            }
+
+            $minValue = (int) $row->min_scaled_score;
+            $maxValue = (int) $row->max_scaled_score;
+
+            $label = $minValue === 0
+                ? 'Below ' . ($maxValue + 1)
+                : ($maxValue === 9999
+                    ? 'Above ' . ($minValue - 1)
+                    : ($minValue === $maxValue
+                        ? (string) $minValue
+                        : "{$minValue} - {$maxValue}"));
+
+            return [
+                'min_value' => $minValue,
+                'max_value' => $maxValue,
+                'label' => $label,
+            ];
+        };
+
+        $findCell = function ($items, $type) use ($formatRange) {
+            $row = $items->firstWhere('type', $type);
+            return $formatRange($row);
+        };
+
+        $grouped = $rows
+            ->groupBy(function ($row) {
+                return $row->stanine . ':' . $row->percentile_rank;
+            })
+            ->map(function ($items) use ($findCell) {
+                $first = $items->first();
+
+                return [
+                    'stanine' => (int) $first->stanine,
+                    'percentile_rank' => (int) $first->percentile_rank,
+                    'total' => $findCell($items, 'total'),
+                    'verbal' => $findCell($items, 'verbal'),
+                    'nonverbal' => $findCell($items, 'nonverbal'),
+                ];
+            })
+            ->values();
+
+        $paginated = new LengthAwarePaginator(
+            $grouped->forPage($page, $perPage)->values(),
+            $grouped->count(),
+            $perPage,
+            $page,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
+
+        return response()->json($paginated);
+    }
+
+    public function clusterPerformanceRows(Request $request)
+    {
+        $validated = $request->validate([
+            'grade' => ['nullable', 'integer', 'in:4,5,6,7,8,9,10,11,12'],
+            'per_page' => ['nullable', 'integer', 'in:5,10,20,50'],
+            'page' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        $grade = $validated['grade'] ?? 4;
+        $perPage = $validated['per_page'] ?? 10;
+        $page = $validated['page'] ?? LengthAwarePaginator::resolveCurrentPage();
+
+        $labelRange = function ($min, $max) {
+            if ($min === null || $max === null) {
+                return '—';
+            }
+
+            if ((int) $min === (int) $max) {
+                return (string) $min;
+            }
+
+            return "{$min} - {$max}";
+        };
+
+        $rows = ClusterPerformanceCategory::query()
+            ->where('grade', $grade)
+            ->get()
+            ->map(function ($row) use ($labelRange) {
+                return [
+                    'cluster' => $row->cluster,
+                    'cluster_label' => match ($row->cluster) {
+                        'total' => 'Total',
+                        'verbal' => 'Verbal',
+                        'verbal_comprehension' => 'Verbal Comprehension',
+                        'verbal_reasoning' => 'Verbal Reasoning',
+                        'nonverbal' => 'Nonverbal',
+                        'figural_reasoning' => 'Figural Reasoning',
+                        'quantitative_reasoning' => 'Quantitative Reasoning',
+                        default => ucfirst(str_replace('_', ' ', $row->cluster)),
+                    },
+                    'number_of_items' => (int) $row->number_of_items,
+                    'below_average' => $labelRange($row->below_min, $row->below_max),
+                    'average' => $labelRange($row->average_min, $row->average_max),
+                    'above_average' => $labelRange($row->above_min, $row->above_max),
                 ];
             })
             ->values();

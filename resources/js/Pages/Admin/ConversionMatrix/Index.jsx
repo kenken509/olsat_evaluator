@@ -15,6 +15,10 @@
     import AgeConversionTableSkeleton from "./Components/AgeConversionTableSkeleton";
     import SaiRankStanineTable from "./Components/SaiRankStanineTable";
     import SaiRankStanineTableSkeleton from "./Components/SaiRankStanineTableSkeleton";
+    import GradeRankStanineTable from "./Components/GradeRankStanineTable";
+    import GradeRankStanineTableSkeleton from "./Components/GradeRankStanineTableSkeleton";
+    import ClusterPerformanceCategoryTable from "./Components/ClusterPerformanceCategoryTable";
+    import ClusterPerformanceCategoryTableSkeleton from "./Components/ClusterPerformanceCategoryTableSkeleton";
     import {
         fetchConversionMatrixRows,
         supportsRemoteCategory,
@@ -44,12 +48,10 @@
                 "18 y/o",
             ],
         },
-        Sai_Percentile_Rank_and_Stanine:{
+        saiRankStanine: {
             label: "SAI Rank / Stanine",
             color: "bg-sky-100 text-sky-700 border-sky-200",
-             options: [
-                "General"
-            ],
+            options: ["General"],
         },
         gradeRank: {
             label: "Grade Rank / Stanine",
@@ -66,10 +68,20 @@
                 "Grade 12",
             ],
         },
-        verbal: {
-            label: "Verbal Interpretation",
+        clusterPerformance: {
+            label: "Cluster Performance Categories",
             color: "bg-emerald-100 text-emerald-700 border-emerald-200",
-            options: ["Grade 4-7", "Grade 8-10", "Grade 11-12"],
+            options: [
+                "Grade 4",
+                "Grade 5",
+                "Grade 6",
+                "Grade 7",
+                "Grade 8",
+                "Grade 9",
+                "Grade 10",
+                "Grade 11",
+                "Grade 12",
+            ],
         },
     };
 
@@ -388,8 +400,8 @@
                                 <LevelConversionTableSkeleton rows={pagination.per_page || 10} />
                             ) : category === "ages" ? (
                                 <AgeConversionTableSkeleton rows={pagination.per_page || 5} />
-                            ) : category === "Sai_Percentile_Rank_and_Stanine" ? (
-                                <SaiRankStanineTableSkeleton rows={pagination.per_page || 5} />
+                            ) : category === "gradeRank" ? (
+                                <GradeRankStanineTableSkeleton rows={pagination.per_page || 5} />
                             ) : (
                                 <div className="px-5 py-8 text-sm text-slate-500">
                                     Loading conversion rows...
@@ -399,8 +411,12 @@
                             <LevelConversionTable rows={rows} />
                         ) : category === "ages" ? (
                             <AgeConversionTable rows={rows} />
-                        ) : category === "Sai_Percentile_Rank_and_Stanine" ? (
+                        ) : category === "saiRankStanine" ? (
                             <SaiRankStanineTable rows={rows} />
+                        ) : category === "gradeRank" ? (
+                            <GradeRankStanineTable rows={rows} />
+                        )  : category === "clusterPerformance" ? (
+                            <ClusterPerformanceCategoryTable rows={rows} />
                         ) : (
                             <StandardTable rows={rows} />
                         )}

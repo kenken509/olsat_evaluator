@@ -69,5 +69,7 @@ Route::middleware(['auth', 'admin'])->controller(ConversionMatrixController::cla
     Route::get('/admin-panel/conversion-matrix', 'index');
     Route::get('/admin-panel/conversion-matrix/levels', 'levelRows');
     Route::get('/admin-panel/conversion-matrix/ages', 'ageRows');
-    Route::get('/admin-panel/conversion-matrix/sai-rank-stanine', [ConversionMatrixController::class, 'saiRankStanineRows']);
+    Route::get('/admin-panel/conversion-matrix/sai-rank-stanine', 'saiRankStanineRows');
+    Route::get('/admin-panel/conversion-matrix/grade-rank', 'gradeRankRows');
+    Route::get('/admin-panel/conversion-matrix/cluster-performance',  'clusterPerformanceRows');
 });
