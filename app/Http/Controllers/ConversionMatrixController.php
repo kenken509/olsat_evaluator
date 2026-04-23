@@ -6,6 +6,8 @@ use App\Models\RawScaledLevel;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\ScaledScoresToSai;
+use App\Models\SaiPercentileRankAndStanine;
+
 
 class ConversionMatrixController extends Controller
 {
@@ -144,6 +146,43 @@ class ConversionMatrixController extends Controller
         $paginated = new LengthAwarePaginator(
             $grouped->forPage($page, $perPage)->values(),
             $grouped->count(),
+            $perPage,
+            $page,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
+
+        return response()->json($paginated);
+    }
+
+    public function saiRankStanineRows(Request $request)
+    {
+        $validated = $request->validate([
+            'per_page' => ['nullable', 'integer', 'in:5,10,20,50'],
+            'page' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        $perPage = $validated['per_page'] ?? 10;
+        $page = $validated['page'] ?? LengthAwarePaginator::resolveCurrentPage();
+
+        $rows = SaiPercentileRankAndStanine::query()
+            ->orderByDesc('sai')
+            ->get()
+            ->map(function ($row) {
+                return [
+                    'sai' => (int) $row->sai,
+                    'label' => (int) $row->sai === 58 ? '58 and below' : (string) $row->sai,
+                    'percentile_rank' => (int) $row->percentile_rank,
+                    'stanine' => (int) $row->stanine,
+                ];
+            })
+            ->values();
+
+        $paginated = new LengthAwarePaginator(
+            $rows->forPage($page, $perPage)->values(),
+            $rows->count(),
             $perPage,
             $page,
             [

@@ -40,6 +40,14 @@ const CATEGORY_REQUEST_MAP = {
         }),
     },
 
+    Sai_Percentile_Rank_and_Stanine: {
+        url: "/admin-panel/conversion-matrix/sai-rank-stanine",
+        buildParams: ({ page, perPage }) => ({
+            page,
+            per_page: perPage,
+        }),
+    },
+
     gradeRank: {
         url: "/admin-panel/conversion-matrix/grade-rank",
         buildParams: ({ selectedGroup, page, perPage }) => ({

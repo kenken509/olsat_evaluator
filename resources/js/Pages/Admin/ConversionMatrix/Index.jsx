@@ -13,6 +13,8 @@
     import LevelConversionTableSkeleton from "./Components/LevelConversionTableSkeleton";
     import AgeConversionTable from "./Components/AgeConversionTable";
     import AgeConversionTableSkeleton from "./Components/AgeConversionTableSkeleton";
+    import SaiRankStanineTable from "./Components/SaiRankStanineTable";
+    import SaiRankStanineTableSkeleton from "./Components/SaiRankStanineTableSkeleton";
     import {
         fetchConversionMatrixRows,
         supportsRemoteCategory,
@@ -386,19 +388,22 @@
                                 <LevelConversionTableSkeleton rows={pagination.per_page || 10} />
                             ) : category === "ages" ? (
                                 <AgeConversionTableSkeleton rows={pagination.per_page || 5} />
+                            ) : category === "Sai_Percentile_Rank_and_Stanine" ? (
+                                <SaiRankStanineTableSkeleton rows={pagination.per_page || 5} />
                             ) : (
                                 <div className="px-5 py-8 text-sm text-slate-500">
                                     Loading conversion rows...
                                 </div>
                             )
-                            ) : category === "levels" ? (
-                                <LevelConversionTable rows={rows} />
-                            ) : category === "ages" ? (
-                                <AgeConversionTable rows={rows} />
-                            ) : (
-                                <StandardTable rows={rows} />
-                            )
-                        }
+                        ) : category === "levels" ? (
+                            <LevelConversionTable rows={rows} />
+                        ) : category === "ages" ? (
+                            <AgeConversionTable rows={rows} />
+                        ) : category === "Sai_Percentile_Rank_and_Stanine" ? (
+                            <SaiRankStanineTable rows={rows} />
+                        ) : (
+                            <StandardTable rows={rows} />
+                        )}
 
                         <div className="flex items-center justify-between border-t border-slate-200 px-5 py-4 text-sm text-slate-500">
                             <span>
