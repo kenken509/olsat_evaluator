@@ -307,7 +307,7 @@
                                     <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                                         <div className="flex-1">
                                             <p className="text-sm font-semibold text-slate-900">
-                                                Select subgroup || {category}
+                                                Select subgroup 
                                             </p>
 
                                             <div className="mt-3 flex flex-wrap gap-2">
@@ -400,8 +400,12 @@
                                 <LevelConversionTableSkeleton rows={pagination.per_page || 10} />
                             ) : category === "ages" ? (
                                 <AgeConversionTableSkeleton rows={pagination.per_page || 5} />
+                            ) : category === "saiRankStanine" ? (
+                                <SaiRankStanineTableSkeleton rows={pagination.per_page || 5} />
                             ) : category === "gradeRank" ? (
                                 <GradeRankStanineTableSkeleton rows={pagination.per_page || 5} />
+                            ) : category === "clusterPerformance" ? (
+                                <ClusterPerformanceCategoryTableSkeleton rows={pagination.per_page || 5} />
                             ) : (
                                 <div className="px-5 py-8 text-sm text-slate-500">
                                     Loading conversion rows...

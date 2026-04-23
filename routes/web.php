@@ -20,7 +20,8 @@ Route::get('/', function () {
 
 Route::controller(EvaluatorController::class)->group(function () {
     Route::get('/evaluator', 'index');
-
+    Route::get('/evaluator/test', 'testEvaluator');
+    Route::get('/evaluator/students/search', 'searchStudents');
     Route::post('/evaluator/evaluate', 'evaluate');
 });
 
@@ -32,7 +33,9 @@ Route::controller(ConversionTableController::class)->group(function () {
 Route::controller(AuthController::class)->group(function () {
     Route::get('/login', 'index')->name('login');
     Route::post('/login', 'store');
-    Route::get('/logout', 'destroy');
+    Route::post('/logout', 'destroy')
+        ->middleware('auth')
+        ->name('logout');
 });
 
 Route::middleware(['auth', 'admin'])->controller(AdminDashboardController::class)->group(function () {
