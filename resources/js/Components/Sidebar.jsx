@@ -5,6 +5,7 @@ import { FiUsers, FiSettings } from "react-icons/fi";
 import { CiViewTable } from "react-icons/ci";
 import { IoShieldCheckmarkOutline } from "react-icons/io5";
 import { LuArrowLeftRight } from "react-icons/lu";
+import { HiOutlineDocumentReport } from "react-icons/hi";
 
 export default function Sidebar({ open, setOpen }) {
     const { url } = usePage();
@@ -15,8 +16,8 @@ export default function Sidebar({ open, setOpen }) {
         { label: "Students", href: "/admin-panel/students", icon: <PiStudentLight /> },
         { label: "Conversion Matrix", href: "/admin-panel/conversion-matrix", icon: <CiViewTable /> },
         { label: "Evaluator", href: "/evaluator", icon: <LuArrowLeftRight /> },
+        { label: "Reports", href: "/admin-panel/reports", icon: <HiOutlineDocumentReport /> },
         { label: "Audit Logs", href: "/admin-panel/audit-logs", icon: <IoShieldCheckmarkOutline /> },
-        { label: "Settings", href: "/admin/settings", icon: <FiSettings /> },
     ];
 
     return (

@@ -10,7 +10,7 @@ export default function GradeRankStanineTableSkeleton({ rows = 5 }) {
                             Stanine
                         </th>
                         <th className="border border-slate-700 px-4 py-3 text-center text-sm font-semibold">
-                            %ile Rank
+                            Percentile Rank
                         </th>
                         <th className="border border-slate-700 px-4 py-3 text-center text-sm font-semibold">
                             Total

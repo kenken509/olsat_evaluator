@@ -69,7 +69,7 @@
             ],
         },
         clusterPerformance: {
-            label: "Cluster Performance Categories",
+            label: "Cluster Performance",
             color: "bg-emerald-100 text-emerald-700 border-emerald-200",
             options: [
                 "Grade 4",
@@ -329,7 +329,7 @@
                                             </div>
                                         </div>
 
-                                        <div className="w-full xl:ml-4 xl:max-w-sm">
+                                        {/* <div className="w-full xl:ml-4 xl:max-w-sm">
                                             <div className="relative">
                                                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                                                 <input
@@ -339,7 +339,7 @@
                                                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-[#7A1C1C] focus:bg-white"
                                                 />
                                             </div>
-                                        </div>
+                                        </div> */}
                                     </div>
                                 </div>
                             </div>

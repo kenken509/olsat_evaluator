@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConversionMatrixController;
 use App\Http\Controllers\ConversionTableController;
 use App\Http\Controllers\EvaluatorController;
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\StudentsController;
 use App\Http\Controllers\UsersController;
 use App\Models\RawScaledLevel;
@@ -75,4 +76,8 @@ Route::middleware(['auth', 'admin'])->controller(ConversionMatrixController::cla
     Route::get('/admin-panel/conversion-matrix/sai-rank-stanine', 'saiRankStanineRows');
     Route::get('/admin-panel/conversion-matrix/grade-rank', 'gradeRankRows');
     Route::get('/admin-panel/conversion-matrix/cluster-performance',  'clusterPerformanceRows');
+});
+
+Route::middleware(['auth', 'admin'])->controller(ReportsController::class)->group(function () {
+    Route::get('/admin-panel/reports', 'index');
 });
