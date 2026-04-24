@@ -5,11 +5,10 @@ use App\Http\Controllers\AuditLogsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConversionMatrixController;
 use App\Http\Controllers\ConversionTableController;
+use App\Http\Controllers\EvaluationReportsController;
 use App\Http\Controllers\EvaluatorController;
-use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\StudentsController;
 use App\Http\Controllers\UsersController;
-use App\Models\RawScaledLevel;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Route;
 use Termwind\Components\Raw;
@@ -78,6 +77,8 @@ Route::middleware(['auth', 'admin'])->controller(ConversionMatrixController::cla
     Route::get('/admin-panel/conversion-matrix/cluster-performance',  'clusterPerformanceRows');
 });
 
-Route::middleware(['auth', 'admin'])->controller(ReportsController::class)->group(function () {
-    Route::get('/admin-panel/reports', 'index');
+
+Route::middleware(['auth', 'admin'])->controller(EvaluationReportsController::class)->group(function () {
+    Route::get('/admin-panel/evaluation-reports', 'index');
+    Route::get('/admin-panel/evaluation-reports/fetch', 'fetch');
 });

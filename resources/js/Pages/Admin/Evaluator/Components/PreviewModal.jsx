@@ -260,15 +260,57 @@ export default function PreviewModal({
                                             </thead>
 
                                             <tbody>
-                                                {clusterRows.map(([label, item]) => (
-                                                    <tr key={label}>
-                                                        <TableCell align="left" strong>{label}</TableCell>
-                                                        <TableCell>{clusterValue(item, "number_of_items")}</TableCell>
-                                                        <TableCell>{clusterValue(item, "below_average")}</TableCell>
-                                                        <TableCell>{clusterValue(item, "average")}</TableCell>
-                                                        <TableCell>{clusterValue(item, "above_average")}</TableCell>
-                                                    </tr>
-                                                ))}
+                                                {clusterRows.map(([label, item]) => {
+                                                    const isParent = label === "Verbal" || label === "Nonverbal";
+                                                    const isChild =
+                                                        label === "Verbal Comprehension" ||
+                                                        label === "Verbal Reasoning" ||
+                                                        label === "Figural Reasoning" ||
+                                                        label === "Quantitative Reasoning";
+
+                                                    const isTotal = label === "Total";
+
+                                                    return (
+                                                        <tr
+                                                            key={label}
+                                                            className={
+                                                                isParent
+                                                                    ? "bg-[#FBF7EE]"
+                                                                    : isTotal
+                                                                    ? "bg-[#FFFDFC]"
+                                                                    : "bg-white"
+                                                            }
+                                                        >
+                                                            <TableCell
+                                                                align="left"
+                                                                strong={isParent || isTotal}
+                                                                className={`
+                                                                    ${isParent ? "text-[#8F1D1D] font-bold" : ""}
+                                                                    ${isTotal ? "text-[#8F1D1D] font-bold" : ""}
+                                                                    ${isChild ? "pl-8 italic text-slate-700" : ""}
+                                                                `}
+                                                            >
+                                                                {isChild ? `↳ ${label}` : label}
+                                                            </TableCell>
+
+                                                            <TableCell className={isParent ? "font-bold text-[#8F1D1D]" : ""}>
+                                                                {clusterValue(item, "number_of_items")}
+                                                            </TableCell>
+
+                                                            <TableCell className={isParent ? "font-bold text-[#8F1D1D]" : ""}>
+                                                                {clusterValue(item, "below_average")}
+                                                            </TableCell>
+
+                                                            <TableCell className={isParent ? "font-bold text-[#8F1D1D]" : ""}>
+                                                                {clusterValue(item, "average")}
+                                                            </TableCell>
+
+                                                            <TableCell className={isParent ? "font-bold text-[#8F1D1D]" : ""}>
+                                                                {clusterValue(item, "above_average")}
+                                                            </TableCell>
+                                                        </tr>
+                                                    );
+                                                })}
                                             </tbody>
                                         </table>
                                     </div>

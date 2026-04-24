@@ -16,7 +16,7 @@ export default function Sidebar({ open, setOpen }) {
         { label: "Students", href: "/admin-panel/students", icon: <PiStudentLight /> },
         { label: "Conversion Matrix", href: "/admin-panel/conversion-matrix", icon: <CiViewTable /> },
         { label: "Evaluator", href: "/evaluator", icon: <LuArrowLeftRight /> },
-        { label: "Reports", href: "/admin-panel/reports", icon: <HiOutlineDocumentReport /> },
+        { label: "Evaluation Reports", href: "/admin-panel/evaluation-reports", icon: <HiOutlineDocumentReport /> },
         { label: "Audit Logs", href: "/admin-panel/audit-logs", icon: <IoShieldCheckmarkOutline /> },
     ];
 

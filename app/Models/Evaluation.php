@@ -9,8 +9,8 @@ class Evaluation extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'test_date' => 'date',
         'birthdate' => 'date',
+        'test_date' => 'date',
         'cluster_analysis' => 'array',
         'result_payload' => 'array',
     ];
