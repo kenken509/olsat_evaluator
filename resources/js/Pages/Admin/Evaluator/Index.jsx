@@ -1,5 +1,7 @@
 import AdminLayout from "../../../Layouts/AdminLayout";
+import PreviewModal from "./Components/PreviewModal";
 import axios from "axios";
+import Swal from "sweetalert2";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const THEME = {
@@ -16,9 +18,10 @@ const initialForm = {
     test_date: new Date().toISOString().slice(0, 10),
     form: "5",
     level: "F",
-    total: "",
-    verbal: "",
-    nonverbal: "",
+    verbal_comprehension: "",
+    verbal_reasoning: "",
+    nonverbal_figural_reasoning: "",
+    nonverbal_quantitative_reasoning: "",
 };
 
 function calculateAgeBreakdown(birthdate, testDate) {
@@ -57,10 +60,16 @@ function formatDisplayDate(value) {
     });
 }
 
+function toNumber(value) {
+    if (value === "" || value === null || value === undefined) return 0;
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+}
+
 function Card({ children, className = "" }) {
     return (
         <div
-            className={`rounded-[24px] border  shadow-sm ${className}`}
+            className={`rounded-[24px] border bg-white shadow-sm ${className}`}
             style={{ borderColor: THEME.border }}
         >
             {children}
@@ -122,11 +131,28 @@ function Select({ error, children, className = "", ...props }) {
     );
 }
 
+function SummaryMetric({ label, value }) {
+    return (
+        <div
+            className="rounded-2xl border bg-white p-4"
+            style={{ borderColor: THEME.border }}
+        >
+            <p className="text-sm text-slate-500">{label}</p>
+            <p className="mt-2 text-2xl font-bold" style={{ color: THEME.maroon }}>
+                {value ?? "—"}
+            </p>
+        </div>
+    );
+}
+
 export default function Index() {
+    const [resetAfterPreview, setResetAfterPreview] = useState(false);
     const [form, setForm] = useState(initialForm);
     const [errors, setErrors] = useState({});
     const [result, setResult] = useState(null);
+    const [evaluationId, setEvaluationId] = useState(null);
     const [submitting, setSubmitting] = useState(false);
+    const [previewOpen, setPreviewOpen] = useState(false);
 
     const [studentQuery, setStudentQuery] = useState("");
     const [studentResults, setStudentResults] = useState([]);
@@ -138,6 +164,24 @@ export default function Index() {
     const age = useMemo(() => {
         return calculateAgeBreakdown(selectedStudent?.birthdate, form.test_date);
     }, [selectedStudent, form.test_date]);
+
+    const computedScores = useMemo(() => {
+        const verbal =
+            toNumber(form.verbal_comprehension) + toNumber(form.verbal_reasoning);
+
+        const nonverbal =
+            toNumber(form.nonverbal_figural_reasoning) +
+            toNumber(form.nonverbal_quantitative_reasoning);
+
+        const total = verbal + nonverbal;
+
+        return { verbal, nonverbal, total };
+    }, [
+        form.verbal_comprehension,
+        form.verbal_reasoning,
+        form.nonverbal_figural_reasoning,
+        form.nonverbal_quantitative_reasoning,
+    ]);
 
     useEffect(() => {
         const handler = setTimeout(async () => {
@@ -175,82 +219,160 @@ export default function Index() {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
-        setErrors((prev) => ({ ...prev, [name]: null, lookup: null }));
+
+        setForm((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+
+        setErrors((prev) => ({
+            ...prev,
+            [name]: null,
+            total: null,
+            verbal: null,
+            nonverbal: null,
+            lookup: null,
+        }));
     };
 
     const handleSelectStudent = (student) => {
         setSelectedStudent(student);
         setStudentQuery(student.name);
         setStudentResults([]);
+        setResult(null);
+        setEvaluationId(null);
+
         setForm((prev) => ({
             ...prev,
             student_id: student.id,
         }));
+
         setErrors((prev) => ({
             ...prev,
             student_id: null,
+            grade: null,
+            age_years: null,
+            age_months: null,
         }));
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+    e.preventDefault();
 
-        setSubmitting(true);
-        setErrors({});
-        setResult(null);
+    setSubmitting(true);
+    setErrors({});
 
-        try {
-            const response = await axios.post("/evaluator/evaluate", form);
+    try {
+        const payload = {
+            ...form,
+            student_name: selectedStudent?.name ?? null,
+            grade: selectedStudent?.grade ? Number(selectedStudent.grade) : null,
+            age_years: age.years === "" ? null : Number(age.years),
+            age_months: age.months === "" ? null : Number(age.months),
+            verbal: computedScores.verbal,
+            nonverbal: computedScores.nonverbal,
+            total: computedScores.total,
+        };
+
+        const response = await axios.post("/evaluator/evaluate", payload);
+
+        if (response?.data?.data) {
             setResult(response.data.data);
-        } catch (error) {
-            if (error.response?.status === 422) {
-                setErrors(error.response.data.errors ?? {});
-            } else {
-                console.error(error);
-                alert("Something went wrong while evaluating.");
-            }
-        } finally {
-            setSubmitting(false);
-        }
-    };
+            setEvaluationId(response.data.evaluation_id ?? null);
+            setResetAfterPreview(true);
 
-    const handleReset = () => {
+            await Swal.fire({
+                icon: "success",
+                title: "Evaluation Saved",
+                text: response.data.message || "Evaluation completed successfully.",
+                confirmButtonText: "Open Preview",
+                confirmButtonColor: THEME.maroon,
+                background: "#FFFDFC",
+                color: "#3F3F46",
+            });
+
+            setPreviewOpen(true);
+        }
+    } catch (error) {
+        if (error.response?.status === 422) {
+            const responseErrors = error.response.data.errors ?? {};
+            setErrors(responseErrors);
+
+            await Swal.fire({
+                icon: "warning",
+                title: "Please review the form",
+                text:
+                    responseErrors.lookup?.[0] ||
+                    "Some fields need attention before evaluation can continue.",
+                confirmButtonColor: THEME.maroon,
+                background: "#FFFDFC",
+                color: "#3F3F46",
+            });
+        } else {
+            console.error(error);
+
+            await Swal.fire({
+                icon: "error",
+                title: "Evaluation Failed",
+                text: "Something went wrong while evaluating the student.",
+                confirmButtonColor: THEME.maroon,
+                background: "#FFFDFC",
+                color: "#3F3F46",
+            });
+        }
+    } finally {
+        setSubmitting(false);
+    }
+};
+
+    const handleReset = async () => {
+    const confirmation = await Swal.fire({
+        icon: "question",
+        title: "Reset form?",
+        text: "This will clear the current student and score entries.",
+        showCancelButton: true,
+        confirmButtonText: "Yes, reset",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: THEME.maroon,
+        cancelButtonColor: "#6B7280",
+        background: "#FFFDFC",
+        color: "#3F3F46",
+    });
+
+    if (!confirmation.isConfirmed) return;
+
+    clearFormState();
+};
+    const clearFormState = () => {
         setForm(initialForm);
         setErrors({});
         setResult(null);
+        setEvaluationId(null);
+        setPreviewOpen(false);
+        setResetAfterPreview(false);
         setStudentQuery("");
         setStudentResults([]);
         setSelectedStudent(null);
     };
 
+    const handlePreviewClose = () => {
+        setPreviewOpen(false);
+
+        if (resetAfterPreview) {
+            clearFormState();
+        }
+    };
+
     return (
         <AdminLayout>
-            <div className="mx-auto max-w-7xl ">
-                <div className="overflow-hidden rounded-[28px] bg-[#F7F4EE] shadow-xl">
-                    <div
-                        className="flex items-center gap-4 px-6 py-4 text-white"
-                        style={{
-                            background: `linear-gradient(90deg, ${THEME.maroon}, ${THEME.maroonDark})`,
-                        }}
-                    >
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-2xl">
-                            🎯
-                        </div>
-                        <div>
-                            <h1 className="text-4xl font-bold leading-none">OLSAT Evaluator</h1>
-                            <p className="mt-2 text-sm text-white/85">
-                                Cavite Institute · Student Entry Form
-                            </p>
-                        </div>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 p-4 xl:grid-cols-3">
-                        <div className="space-y-6 xl:col-span-2">
-                            <Card className="p-4">
+            <div className="mx-auto max-w-7xl">
+                <div className="overflow-hidden rounded-[30px] bg-[#F7F4EE]  shadow-[0_25px_60px_rgba(0,0,0,0.08)]">
+                    <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-2 p-4 xl:grid-cols-3">
+                        <div className="space-y-2 xl:col-span-2">
+                            <Card className="p-5">
                                 <SectionTitle
                                     title="Student Information"
-                                    subtitle="Search and select the student, then confirm the birthdate and grade."
+                                    subtitle="Search and select a student record. Grade and birthdate are loaded automatically."
                                 />
 
                                 <div ref={searchBoxRef} className="relative">
@@ -263,7 +385,7 @@ export default function Index() {
                                             setSelectedStudent(null);
                                             setForm((prev) => ({ ...prev, student_id: "" }));
                                         }}
-                                        placeholder="Search by student name or ID"
+                                        placeholder="Search by student name or student ID"
                                         error={errors.student_id}
                                     />
 
@@ -278,7 +400,7 @@ export default function Index() {
                                                     key={student.id}
                                                     type="button"
                                                     onClick={() => handleSelectStudent(student)}
-                                                    className="block w-full border-b px-4 py-3 text-left hover:bg-[#FBF7EE]"
+                                                    className="block w-full border-b px-4 py-3 text-left transition hover:bg-[#FBF7EE]"
                                                     style={{ borderColor: "#F1E7D5" }}
                                                 >
                                                     <div className="font-semibold text-slate-800">
@@ -293,9 +415,7 @@ export default function Index() {
                                     )}
 
                                     {errors.student_id && (
-                                        <p className="mt-2 text-sm text-red-600">
-                                            {errors.student_id[0]}
-                                        </p>
+                                        <p className="mt-2 text-sm text-red-600">{errors.student_id[0]}</p>
                                     )}
                                 </div>
 
@@ -321,7 +441,11 @@ export default function Index() {
                                     <div>
                                         <Label>Date of Birth</Label>
                                         <Input
-                                            value={selectedStudent?.birthdate ? formatDisplayDate(selectedStudent.birthdate) : ""}
+                                            value={
+                                                selectedStudent?.birthdate
+                                                    ? formatDisplayDate(selectedStudent.birthdate)
+                                                    : ""
+                                            }
                                             readOnly
                                             placeholder="No birthdate found"
                                         />
@@ -334,66 +458,103 @@ export default function Index() {
                                             readOnly
                                             placeholder="Grade"
                                         />
+                                        {errors.grade && (
+                                            <p className="mt-2 text-sm text-red-600">{errors.grade[0]}</p>
+                                        )}
                                     </div>
                                 </div>
                             </Card>
 
-                            <Card className="p-4">
+                            <Card className="px-5 py-2">
                                 <SectionTitle
                                     title="Raw Scores"
-                                    subtitle="Encode the raw scores from the OLSAT score record."
-                                />
-
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                                    <div>
-                                        <Label>Total</Label>
+                                    subtitle="Enter the detailed subtest scores. Total, verbal, and nonverbal are computed automatically."
+                                /> 
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-4 pt-2">
+                                     <div>
+                                        <Label>Verbal Comprehension</Label>
                                         <Input
                                             type="number"
                                             min="0"
-                                            name="total"
-                                            value={form.total}
+                                            name="verbal_comprehension"
+                                            value={form.verbal_comprehension}
                                             onChange={handleChange}
-                                            error={errors.total}
+                                            error={errors.verbal_comprehension}
                                             placeholder="0"
                                         />
+                                        {errors.verbal_comprehension && (
+                                            <p className="mt-2 text-sm text-red-600">{errors.verbal_comprehension[0]}</p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <Label>Verbal Reasoning</Label>
+                                        <Input
+                                            type="number"
+                                            min="0"
+                                            name="verbal_reasoning"
+                                            value={form.verbal_reasoning}
+                                            onChange={handleChange}
+                                            error={errors.verbal_reasoning}
+                                            placeholder="0"
+                                        />
+                                        {errors.verbal_reasoning && (
+                                            <p className="mt-2 text-sm text-red-600">{errors.verbal_reasoning[0]}</p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <Label>Figural Reasoning</Label>
+                                        <Input
+                                            type="number"
+                                            min="0"
+                                            name="nonverbal_figural_reasoning"
+                                            value={form.nonverbal_figural_reasoning}
+                                            onChange={handleChange}
+                                            error={errors.nonverbal_figural_reasoning}
+                                            placeholder="0"
+                                        />
+                                        {errors.nonverbal_figural_reasoning && (
+                                            <p className="mt-2 text-sm text-red-600">{errors.nonverbal_figural_reasoning[0]}</p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <Label>Quantitative Reasoning</Label>
+                                        <Input
+                                            type="number"
+                                            min="0"
+                                            name="nonverbal_quantitative_reasoning"
+                                            value={form.nonverbal_quantitative_reasoning}
+                                            onChange={handleChange}
+                                            error={errors.nonverbal_quantitative_reasoning}
+                                            placeholder="0"
+                                        />
+                                        {errors.nonverbal_quantitative_reasoning && (
+                                            <p className="mt-2 text-sm text-red-600">{errors.nonverbal_quantitative_reasoning[0]}</p>
+                                        )}
+                                    </div>
+                                </div>
+                                
+                                <div className="flex flex-col gap-2 pt-4">
+                                    <div>
+                                        <Label>Total : {computedScores.total ?? 0}</Label>                                      
                                         {errors.total && (
                                             <p className="mt-2 text-sm text-red-600">{errors.total[0]}</p>
                                         )}
                                     </div>
 
                                     <div>
-                                        <Label>Verbal</Label>
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            name="verbal"
-                                            value={form.verbal}
-                                            onChange={handleChange}
-                                            error={errors.verbal}
-                                            placeholder="0"
-                                        />
+                                        <Label>Verbal: {computedScores.verbal ?? 0}</Label>                                    
                                         {errors.verbal && (
                                             <p className="mt-2 text-sm text-red-600">{errors.verbal[0]}</p>
                                         )}
                                     </div>
 
                                     <div>
-                                        <Label>Nonverbal</Label>
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            name="nonverbal"
-                                            value={form.nonverbal}
-                                            onChange={handleChange}
-                                            error={errors.nonverbal}
-                                            placeholder="0"
-                                        />
-                                        {errors.nonverbal && (
-                                            <p className="mt-2 text-sm text-red-600">{errors.nonverbal[0]}</p>
-                                        )}
+                                        <Label>Nonverbal: {computedScores.nonverbal ?? 0}</Label>
                                     </div>
                                 </div>
-
                                 {errors.lookup && (
                                     <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                                         {errors.lookup[0]}
@@ -402,11 +563,11 @@ export default function Index() {
                             </Card>
                         </div>
 
-                        <div className="space-y-6">
-                            <Card className="p-4">
+                        <div className="space-y-2">
+                            <Card className="p-5">
                                 <SectionTitle
                                     title="Test Details"
-                                    subtitle="Set the OLSAT assessment information."
+                                    subtitle="Set the OLSAT administration details."
                                 />
 
                                 <div className="space-y-4">
@@ -430,7 +591,11 @@ export default function Index() {
                                             value={form.form}
                                             onChange={handleChange}
                                             placeholder="Form 5"
+                                            disabled
                                         />
+                                        {errors.form && (
+                                            <p className="mt-2 text-sm text-red-600">{errors.form[0]}</p>
+                                        )}
                                     </div>
 
                                     <div>
@@ -450,7 +615,7 @@ export default function Index() {
                             </Card>
 
                             <div
-                                className="rounded-[24px] border p-4 text-center shadow-sm"
+                                className="rounded-[24px] border p-2 text-center shadow-sm"
                                 style={{
                                     borderColor: THEME.gold,
                                     backgroundColor: THEME.cream,
@@ -466,7 +631,7 @@ export default function Index() {
                                 <div className="mt-6 flex items-end justify-center gap-6">
                                     <div>
                                         <div
-                                            className="text-4xl font-bold"
+                                            className="text-5xl font-bold"
                                             style={{ color: THEME.maroon }}
                                         >
                                             {age.years !== "" ? age.years : "--"}
@@ -483,7 +648,7 @@ export default function Index() {
 
                                     <div>
                                         <div
-                                            className="text-4xl font-bold"
+                                            className="text-5xl font-bold"
                                             style={{ color: THEME.maroon }}
                                         >
                                             {age.months !== "" ? age.months : "--"}
@@ -495,69 +660,58 @@ export default function Index() {
                                 <p className="mt-5 text-sm text-slate-500">
                                     Computed from Date of Birth and Test Date
                                 </p>
+
+                                {(errors.age_years || errors.age_months) && (
+                                    <div className="mt-3 text-sm text-red-600">
+                                        {errors.age_years?.[0] || errors.age_months?.[0]}
+                                    </div>
+                                )}
                             </div>
 
-                            
-
-                            {result && (
-                                <Card className="p-5">
-                                    <SectionTitle
-                                        title="Evaluation Result"
-                                        subtitle="Converted scaled scores"
-                                    />
-
-                                    <div className="space-y-3">
-                                        <div
-                                            className="rounded-2xl p-4 text-white"
+                           <div className="mt-5 grid grid-cols-1 gap-3">
+                                        <button
+                                            type="submit"
+                                            disabled={submitting}
+                                            className="w-full rounded-2xl px-5 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
                                             style={{ backgroundColor: THEME.maroon }}
                                         >
-                                            <p className="text-sm text-white/80">Total Scaled Score</p>
-                                            <p className="mt-2 text-3xl font-bold">
-                                                {result.total.scaled_score}
-                                            </p>
-                                        </div>
+                                            {submitting ? "Evaluating..." : "Evaluate & Save"}
+                                        </button>
 
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div className="rounded-2xl border p-4" style={{ borderColor: THEME.border }}>
-                                                <p className="text-sm text-slate-500">Verbal</p>
-                                                <p className="mt-2 text-2xl font-bold">{result.verbal.scaled_score}</p>
-                                            </div>
-                                            <div className="rounded-2xl border p-4" style={{ borderColor: THEME.border }}>
-                                                <p className="text-sm text-slate-500">Nonverbal</p>
-                                                <p className="mt-2 text-2xl font-bold">{result.nonverbal.scaled_score}</p>
-                                            </div>
-                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={handleReset}
+                                            className="w-full rounded-2xl border px-5 py-3 text-sm font-semibold transition cursor-pointer"
+                                            style={{
+                                                borderColor: THEME.maroon,
+                                                color: THEME.maroon,
+                                                backgroundColor: "white",
+                                            }}
+                                        >
+                                            Reset Form
+                                        </button>
                                     </div>
-                                </Card>
-                            )}
-                        </div>
-                      
-                        <div className="space-y-3 col-span-3">
-                            <button
-                                type="submit"
-                                disabled={submitting}
-                                className="w-full rounded-2xl px-5 py-3 text-sm font-semibold text-white transition disabled:opacity-60"
-                                style={{ backgroundColor: THEME.maroon }}
-                            >
-                                {submitting ? "Evaluating..." : "Evaluate Score"}
-                            </button>
 
-                            <button
-                                type="button"
-                                onClick={handleReset}
-                                className="w-full rounded-2xl border px-5 py-3 text-sm font-semibold transition"
-                                style={{
-                                    borderColor: THEME.maroon,
-                                    color: THEME.maroon,
-                                    backgroundColor: "white",
-                                }}
-                            >
-                                Reset Form
-                            </button>
-                        </div>                      
+                                {evaluationId && (
+                                    <div className="mt-4 rounded-2xl bg-[#FBF7EE] px-4 py-3 text-sm text-slate-700">
+                                        Saved Record ID:{" "}
+                                        <span className="font-bold" style={{ color: THEME.maroon }}>
+                                            {evaluationId}
+                                        </span>
+                                    </div>
+                                )}
+                        </div>
                     </form>
                 </div>
             </div>
+
+            <PreviewModal
+                open={previewOpen}
+                onClose={handlePreviewClose}
+                data={result}
+                evaluationId={evaluationId}
+                theme={THEME}
+            />
         </AdminLayout>
     );
 }
